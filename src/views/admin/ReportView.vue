@@ -100,7 +100,7 @@
               <v-row class="ma-0 pa-0">
                 <v-col class="ma-0 pa-0" cols="3">
                   <v-subheader class="pa-2">Contents</v-subheader>
-                    <v-divider></v-divider>
+                  <v-divider></v-divider>
                   <v-list dense height="470px" class="list-scroll ma-0 pa-0">
                     <v-list-item-group v-model="itemSelected" color="#fca326">
                       <v-list-item v-for="(item, i) in listItems" :key="i">
@@ -121,15 +121,15 @@
 
                 <!--List content-->
                 <v-col class="ma-0 pa-0" v-if="itemSelected != null">
-                    <v-subheader class="pa-2">{{
-                      listItems[itemSelected].title
-                    }}</v-subheader>
-                    <v-divider></v-divider>
-                    <v-treeview
-                      v-if="itemSelected == 0"
-                      selectable
-                      :items="items"
-                    ></v-treeview>
+                  <v-subheader class="pa-2">{{
+                    listItems[itemSelected].title
+                  }}</v-subheader>
+                  <v-divider></v-divider>
+                  <v-treeview
+                    v-if="itemSelected == 0"
+                    selectable
+                    :items="items"
+                  ></v-treeview>
                 </v-col>
               </v-row>
             </v-card>
@@ -164,7 +164,7 @@ export default {
     dialog: false,
     loadingBtn: false,
     report: null,
-    tab: 1,
+    tab: 0,
     itemSelected: null,
     listItems: [
       {
