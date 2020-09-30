@@ -3,7 +3,10 @@
     <v-overlay :value="loading">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
-    <IntroAnswer v-if=" answers != null && intro == true" @goToCoops="goToCoops"></IntroAnswer>
+    <IntroAnswer
+      v-if="answers != null && intro == true"
+      @goToCoops="goToCoops"
+    ></IntroAnswer>
     <v-row justify="center" v-else-if="answers != null && intro == false">
       <ShowInfo title="Answers">
         <!-- Main Tabs -->
@@ -22,7 +25,7 @@
         <!-- Main Tabs Content -->
         <div slot="content" class="ma-0 pa-0">
           <!-- Tab 1 - Statistics -->
-          <v-card v-if="tab==0" style="background: #f5f7ff;">
+          <v-card v-if="tab == 0" style="background: #f5f7ff;">
             <v-card-title class="subtitleView">Statistics</v-card-title>
 
             <v-divider></v-divider>
@@ -38,7 +41,7 @@
                         <v-card-title>Usability Percentage</v-card-title>
                         <v-card-text>
                           <v-row align="center" justify="center">
-                            <p class="display-3">{{finalResult.average}}</p>
+                            <p class="display-3">{{ finalResult.average }}</p>
                           </v-row>
                         </v-card-text>
                       </v-row>
@@ -55,21 +58,29 @@
                           </v-list-item-icon>
 
                           <v-list-item-title>Max</v-list-item-title>
-                          <v-list-item-subtitle class="text-right">{{finalResult.max}}</v-list-item-subtitle>
+                          <v-list-item-subtitle class="text-right">{{
+                            finalResult.max
+                          }}</v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item>
                           <v-list-item-icon>
                             <v-icon>mdi-arrow-down-bold-hexagon-outline</v-icon>
                           </v-list-item-icon>
                           <v-list-item-title>Min</v-list-item-title>
-                          <v-list-item-subtitle class="text-right">{{finalResult.min}}</v-list-item-subtitle>
+                          <v-list-item-subtitle class="text-right">{{
+                            finalResult.min
+                          }}</v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item>
                           <v-list-item-icon>
                             <v-icon>mdi-plus-minus</v-icon>
                           </v-list-item-icon>
-                          <v-list-item-title>Standard deviation</v-list-item-title>
-                          <v-list-item-subtitle class="text-right">{{finalResult.sd}}</v-list-item-subtitle>
+                          <v-list-item-title
+                            >Standard deviation</v-list-item-title
+                          >
+                          <v-list-item-subtitle class="text-right">{{
+                            finalResult.sd
+                          }}</v-list-item-subtitle>
                         </v-list-item>
                       </v-list>
                     </v-col>
@@ -85,13 +96,24 @@
 
             <v-divider></v-divider>
 
-            <v-tabs background-color="transparent" color="grey darken-2" class="mt-2" centered>
-              <v-tab class="tab-text" style="text-transform: none !important" @click="ind = 0">Table</v-tab>
+            <v-tabs
+              background-color="transparent"
+              color="grey darken-2"
+              class="mt-2"
+              centered
+            >
+              <v-tab
+                class="tab-text"
+                style="text-transform: none !important"
+                @click="ind = 0"
+                >Table</v-tab
+              >
               <v-tab
                 class="tab-text"
                 style="text-transform: none !important"
                 @click="ind = 1"
-              >Graphic</v-tab>
+                >Graphic</v-tab
+              >
             </v-tabs>
 
             <v-row justify="center">
@@ -104,15 +126,23 @@
                   class="elevation-1 cardStyle mx-2"
                 >
                   <template v-slot:item.result="{ item }">
-                    <v-chip :color="getColorPorcentage(item.result)" dark>{{ item.result}}%</v-chip>
+                    <v-chip :color="getColorPorcentage(item.result)" dark
+                      >{{ item.result }}%</v-chip
+                    >
                   </template>
-                  <template v-slot:item.answered="{ item }">{{item.answered}}%</template>
+                  <template v-slot:item.answered="{ item }"
+                    >{{ item.answered }}%</template
+                  >
                 </v-data-table>
               </v-col>
 
               <v-col cols="10" v-if="ind == 1">
                 <RadarChart
-                  :labels="evaluatorStatistics.items.map(item => `${item.evaluator} - ${item.result}%`)"
+                  :labels="
+                    evaluatorStatistics.items.map(
+                      item => `${item.evaluator} - ${item.result}%`
+                    )
+                  "
                   :data="evaluatorStatistics.items.map(item => item.result)"
                 />
               </v-col>
@@ -126,22 +156,30 @@
             <v-divider></v-divider>
 
             <!-- Bottom Tabs -->
-            <v-tabs background-color="transparent" color="grey darken-2" class="mt-2" centered>
+            <v-tabs
+              background-color="transparent"
+              color="grey darken-2"
+              class="mt-2"
+              centered
+            >
               <v-tab
                 class="tab-text"
                 style="text-transform: none !important"
                 @click="ind = 0"
-              >Answers by Evaluator</v-tab>
+                >Answers by Evaluator</v-tab
+              >
               <v-tab
                 class="tab-text"
                 style="text-transform: none !important"
                 @click="ind = 1"
-              >Answers By Heuristics</v-tab>
+                >Answers By Heuristics</v-tab
+              >
               <v-tab
                 class="tab-text"
                 style="text-transform: none !important"
                 @click="ind = 2"
-              >Graphic</v-tab>
+                >Graphic</v-tab
+              >
             </v-tabs>
 
             <!-- Bottom Tab Content -->
@@ -165,17 +203,21 @@
                           v-if="header.value != 'heuristic'"
                           :key="header.value"
                           :color="
-                          getColor(item[header.value], item.max, item.min)
-                        "
+                            getColor(item[header.value], item.max, item.min)
+                          "
                           dark
                           class="chip"
-                        >{{ item[header.value]?item[header.value]:0 }}</v-chip>
+                          >{{
+                            item[header.value] ? item[header.value] : 0
+                          }}</v-chip
+                        >
                         <v-btn
                           text
                           v-else
                           @click="goToDataHeuristic(item.heuristic)"
                           :key="header.value"
-                        >{{ item[header.value] }}</v-btn>
+                          >{{ item[header.value] }}</v-btn
+                        >
                       </template>
                     </v-data-table>
                   </v-col>
@@ -192,15 +234,20 @@
                         <v-chip
                           :color="getColor(item.average, item.max, item.min)"
                           dark
-                        >{{ item.average }}</v-chip>
+                          >{{ item.average }}</v-chip
+                        >
                       </template>
                     </v-data-table>
                   </v-col>
                   <!-- Bottom Tab 3 -->
                   <v-col cols="12" v-if="ind == 2">
                     <BarChart
-                      :labels="heuristicsStatistics.items.map(item => item.name)"
-                      :data="heuristicsStatistics.items.map(item => item.average)"
+                      :labels="
+                        heuristicsStatistics.items.map(item => item.name)
+                      "
+                      :data="
+                        heuristicsStatistics.items.map(item => item.average)
+                      "
                       legend="Average"
                     />
                   </v-col>
@@ -231,95 +278,9 @@ export default {
   data: () => ({
     tab: 0,
     ind: 0,
-    resultEvaluator: [],
     intro: null
   }),
   methods: {
-    statistics() {
-      const answers = this.answers.answers;
-
-      this.resultEvaluator = [];
-
-      //Get Evaluator answers
-      let evaluatorIndex = 1;
-      answers.forEach(evaluator => {
-        let SelectEvaluator = this.resultEvaluator.find(
-          e => e.id == `Ev${evaluatorIndex}`
-        );
-        if (!SelectEvaluator) {
-          this.resultEvaluator.push({
-            uid: evaluator.uid,
-            email: evaluator.email,
-            id: `Ev${evaluatorIndex}`,
-            heuristics: [],
-            result: 0
-          });
-          SelectEvaluator = this.resultEvaluator[
-            this.resultEvaluator.length - 1
-          ];
-        }
-        //Get Heuristics for evaluators
-        let heurisIndex = 1;
-        evaluator.heuristics.forEach(heuristic => {
-          //Get Questions for heuristic
-
-          let noAplication = 0;
-          let noReply = 0;
-          let res = heuristic.questions.reduce((totalQuestions, question) => {
-            //grouping of answers
-            if (question.res === null) {
-              noAplication++;
-            } //count answers no aplication
-            if (question.res === "") noReply++;
-            return totalQuestions + Number(question.res); //sum of responses
-          }, 0);
-          if (noAplication == heuristic.questions.length) res = null;
-
-          SelectEvaluator.heuristics.push({
-            id: `H${heurisIndex}`,
-            result: res,
-            totalQuestions: heuristic.total,
-            totalNoAplication: noAplication,
-            totalNoReply: noReply
-          });
-          heurisIndex++;
-        });
-        evaluatorIndex++;
-      });
-
-      //Calc Final result
-      this.resultEvaluator.forEach(ev => {
-        ev.result = this.calcFinalResult(ev.heuristics);
-      });
-    },
-    calcFinalResult(array) {
-      let result = 0;
-      let qtdQuestion = 0;
-      let qtdNoAplication = 0;
-      let maxOption = Math.max(...this.answers.options.map(item => item.value));
-      array.forEach(res => {
-        (result += res.result), (qtdQuestion += res.totalQuestions);
-        qtdNoAplication += res.totalNoAplication;
-      });
-      let perfectResult = (qtdQuestion - qtdNoAplication) * maxOption;
-
-      return ((result * 100) / perfectResult).toFixed(1);
-    },
-    standardDeviation(array) {
-      let average = array.reduce(
-        (total, value) => total + value / array.length,
-        0
-      );
-      return Math.sqrt(
-        array.reduce(
-          (total, valor) => total + Math.pow(average - valor, 2) / array.length,
-          0
-        )
-      );
-    },
-    percentage(value, result) {
-      return (value * 100) / result;
-    },
     getColor(value, max, min) {
       max = Number(max);
       min = Number(min);
@@ -343,7 +304,9 @@ export default {
       let selectHeruristc = this.heuristicsEvaluator.items.indexOf(
         this.heuristicsEvaluator.items.find(h => h.heuristic === item)
       );
-      this.$router.push(`/analyticsview/${this.id}/${selectHeruristc}`).catch(() => {});
+      this.$router
+        .push(`/analyticsview/${this.id}/${selectHeruristc}`)
+        .catch(() => {});
     },
     goToCoops() {
       this.$emit("goToCoops");
@@ -351,179 +314,30 @@ export default {
   },
   computed: {
     heuristicsEvaluator() {
-      let table = {
-        header: [],
-        items: []
-      };
-      let options = this.answers.options.map(op => op.value);
-      let max = Math.max(...options);
-      let min = Math.min(...options);
-
-      table.header.push({
-        text: "Heuristics",
-        align: "start",
-        value: "heuristic"
-      });
-
-      if (this.resultEvaluator) {
-        this.resultEvaluator.forEach(evaluator => {
-          let header = table.header.find(h => h.text == evaluator.id);
-          if (!header) {
-            table.header.push({
-              text: evaluator.id,
-              align: "center",
-              value: evaluator.id
-            });
-          }
-          evaluator.heuristics.forEach(heuristic => {
-            let item = table.items.find(i => i.heuristic == heuristic.id);
-            if (item) {
-              Object.assign(item, { [evaluator.id]: heuristic.result });
-            } else {
-              table.items.push({
-                heuristic: heuristic.id,
-                max: max * heuristic.totalQuestions,
-                min: min * heuristic.totalQuestions,
-                [evaluator.id]: heuristic.result
-              });
-            }
-          });
-        });
-      }
-      return table;
+      return this.$store.getters.getHeuristicsByEvaluator;
     },
     heuristicsStatistics() {
-      let table = {
-        header: [],
-        items: []
-      };
-
-      table.header = [
-        {
-          text: "Heuristics",
-          align: "start",
-          sortable: false,
-          value: "name"
-        },
-        { text: "Average", value: "average", align: "center" },
-        { text: "Standard deviation", value: "sd", align: "center" },
-        { text: "Max", value: "max", align: "center" },
-        { text: "Min", value: "min", align: "center" }
-      ];
-      if (this.heuristicsEvaluator.items) {
-        this.heuristicsEvaluator.items.forEach(item => {
-          let results = Object.entries(item)
-            .filter(item => item[0].includes("Ev"))
-            .map(item => item[1]);
-
-          table.items.push({
-            name: item.heuristic,
-            max: Math.max(...results).toFixed(2),
-            min: Math.min(...results).toFixed(2),
-            sd: this.standardDeviation(results).toFixed(2),
-            average: results
-              .reduce((total, value) => total + value / results.length, 0)
-              .toFixed(2)
-          });
-        });
-      }
-
-      return table;
+      return this.$store.getters.getHeuristicsbytStatistics 
     },
     evaluatorStatistics() {
-      let table = {
-        header: [],
-        items: []
-      };
-
-      table.header = [
-        {
-          text: "Evaluator",
-          align: "start",
-          sortable: false,
-          value: "evaluator"
-        },
-        { text: "Usability Percentage", value: "result", align: "center" },
-        { text: "Applicable Question", value: "aplication", align: "center" },
-        {
-          text: "No Applicable Question",
-          value: "noAplication",
-          align: "center"
-        },
-        { text: "Conclusion Percentage", value: "answered", align: "center" }
-      ];
-
-      if (this.resultEvaluator) {
-        this.resultEvaluator.forEach(evaluator => {
-          let totalNoAplication = 0;
-          let totalNoReply = 0;
-          let totalQuestions = 0;
-
-          evaluator.heuristics.forEach(heuristic => {
-            totalNoAplication += heuristic.totalNoAplication;
-            totalNoReply += heuristic.totalNoReply;
-            totalQuestions += heuristic.totalQuestions;
-          });
-
-          table.items.push({
-            evaluator: evaluator.id,
-            result: evaluator.result,
-            aplication: totalQuestions - totalNoAplication,
-            noAplication: totalNoAplication,
-            answered: (this.percentage(
-              totalQuestions - totalNoReply,
-              totalQuestions
-            )).toFixed(2)
-          });
-        });
-      }
-
-      return table;
+      return this.$store.getters.getEvaluatorByStatistics 
     },
     finalResult() {
-      let testData = {
-        average: null,
-        max: null,
-        min: null,
-        sd: null
-      };
-
-      if (this.evaluatorStatistics.items.length) {
-        let res = this.evaluatorStatistics.items.reduce((total, value) => {
-          return total + value.result / this.evaluatorStatistics.items.length;
-        }, 0);
-
-        testData.average = `${Math.fround(res).toFixed(1)}%`;
-
-        testData.max = `${Math.max(
-          ...this.evaluatorStatistics.items.map(item => item.result)
-        ).toFixed(1)}%`;
-
-        testData.min = `${Math.min(
-          ...this.evaluatorStatistics.items.map(item => item.result)
-        ).toFixed(1)}%`;
-
-        testData.sd = `${this.standardDeviation(
-          this.evaluatorStatistics.items.map(item => item.result)
-        ).toFixed(1)}%`;
-      }
-
-      return testData;
+      return this.$store.getters.getFinalResult
     },
     answers() {
       return this.$store.getters.answers || [];
     },
-    test(){
-      return this.$store.getters.test
+    test() {
+      return this.$store.getters.test;
     },
-    loading(){
-      return this.$store.getters.loading
+    loading() {
+      return this.$store.getters.loading;
     }
   },
   watch: {
     answers() {
       if (this.answers !== null || this.answers.length > 0) {
-        this.statistics();
         if (this.answers.answers.length == 0) this.intro = true;
         else this.intro = false;
       }
@@ -539,7 +353,6 @@ export default {
     ) {
       this.$store.dispatch("getAnswers", { id: this.id });
     }
-
   }
 };
 </script>
