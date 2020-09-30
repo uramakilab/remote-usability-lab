@@ -1,11 +1,25 @@
+import { heuristicsEvaluator, heuristicsStatistics, evaluatorStatistics, finalResult } from "./modules/heuristicCalc.js"
 export default {
   state: {
     answers: null,
   },
   getters: {
-    answers(state){
+    answers(state) {
       return state.answers
+    },
+    getHeuristicsByEvaluator(state) {
+      return heuristicsEvaluator(state.answers)
+    },
+    getHeuristicsbytStatistics(state) {
+      return heuristicsStatistics(state.answers)
+    },
+    getEvaluatorByStatistics(state) {
+      return evaluatorStatistics(state.answers)
+    },
+    getFinalResult(state) {
+      return finalResult(state.answers)
     }
+
   },
   mutations: {
     setAnswers(state, payload) {
@@ -37,11 +51,11 @@ export default {
       });
     },
     async getAnswers({ dispatch, commit }, payload) {
-      commit("setLoading",true);
+      commit("setLoading", true);
       payload = Object.assign(payload, { collection: "answers" });
       let ans = await dispatch("getObject", payload);
       commit("setAnswers", ans);
-      commit("setLoading",false);
+      commit("setLoading", false);
     },
     deleteAnswers({ dispatch }, payload) {
       payload = Object.assign(payload, { collection: "answers" });
