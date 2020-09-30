@@ -85,19 +85,54 @@
             </template>
           </v-data-table>
         </div>
-        <div v-else-if="tab == 1">
-          <v-card style="background: #f5f7ff;">
+
+        <!-- Generate PDF Tab -->
+        <div v-else-if="tab == 1" class="ma-0 pa-0">
+          <v-card style="background: #f5f7ff" elevation="0">
             <v-card-title class="subtitleView"
               >Select content to print:
             </v-card-title>
 
-            <v-divider></v-divider>
+            <v-divider class="mb-0"></v-divider>
 
-            <v-row justify="space-around">
-              <v-col cols="10">
-                <v-treeview selectable :items="items"></v-treeview>
-              </v-col>
-            </v-row>
+            <!-- List -->
+            <v-card>
+              <v-row class="ma-0 pa-0">
+                <v-col class="ma-0 pa-0" cols="3">
+                  <v-subheader class="pa-2">Contents</v-subheader>
+                    <v-divider></v-divider>
+                  <v-list dense height="470px" class="list-scroll ma-0 pa-0">
+                    <v-list-item-group v-model="itemSelected" color="#fca326">
+                      <v-list-item v-for="(item, i) in listItems" :key="i">
+                        <v-list-item-content>
+                          <v-list-item-title>{{
+                            item.title
+                          }}</v-list-item-title>
+                        </v-list-item-content>
+                        <v-list-item-icon v-if="i == itemSelected">
+                          <v-icon>mdi-chevron-right</v-icon>
+                        </v-list-item-icon>
+                      </v-list-item>
+                    </v-list-item-group>
+                  </v-list>
+                </v-col>
+
+                <v-divider vertical></v-divider>
+
+                <!--List content-->
+                <v-col class="ma-0 pa-0" v-if="itemSelected != null">
+                    <v-subheader class="pa-2">{{
+                      listItems[itemSelected].title
+                    }}</v-subheader>
+                    <v-divider></v-divider>
+                    <v-treeview
+                      v-if="itemSelected == 0"
+                      selectable
+                      :items="items"
+                    ></v-treeview>
+                </v-col>
+              </v-row>
+            </v-card>
           </v-card>
         </div>
       </div>
@@ -115,7 +150,7 @@ export default {
   components: {
     ShowInfo,
     Intro,
-    Snackbar
+    Snackbar,
   },
   data: () => ({
     headers: [
@@ -123,13 +158,36 @@ export default {
       { text: "Last Update", value: "log.date" },
       { text: "Progress", value: "progress", justify: "center" },
       { text: "Status", value: "log.status" },
-      { text: "More", value: "more", justify: "end" }
+      { text: "More", value: "more", justify: "end" },
     ],
     loading: true,
     dialog: false,
     loadingBtn: false,
     report: null,
-    tab: 0
+    tab: 1,
+    itemSelected: null,
+    listItems: [
+      {
+        title: "Test",
+        icon: "mdi-file-document-edit",
+        id: 0,
+      },
+      {
+        title: "Answers",
+        icon: "mdi-order-bool-ascending-variant",
+        id: 1,
+      },
+      {
+        title: "Analytics",
+        icon: "mdi-chart-bar",
+        id: 2,
+      },
+      {
+        title: "Cooperators",
+        icon: "mdi-account-group",
+        id: 3,
+      },
+    ],
   }),
   methods: {
     removeReport(report) {
@@ -137,22 +195,22 @@ export default {
         .dispatch("removeReport", {
           docId: this.id,
           element: {
-            id: report.uid
+            id: report.uid,
           },
-          param: "reports"
+          param: "reports",
         })
         .then(() => {
           this.$store.commit("setSuccess", "Report successfully deleted");
           this.loadingBtn = false;
           this.dialog = false;
         })
-        .catch(err => {
+        .catch((err) => {
           this.$store.commit("setError", err);
         });
     },
     goToCoops() {
       this.$emit("goToCoops");
-    }
+    },
   },
   computed: {
     reports() {
@@ -181,38 +239,38 @@ export default {
             items.push({
               id: id++,
               name: "Heuristics",
-              children: heuristics.map(h => {
+              children: heuristics.map((h) => {
                 return {
                   id: id++,
                   name: h.title,
-                  children: h.questions.map(q => {
+                  children: h.questions.map((q) => {
                     return {
                       id: id++,
                       name: q.title,
-                      children: q.descriptions.map(d => {
+                      children: q.descriptions.map((d) => {
                         return {
                           id: id++,
                           name: d.title,
-                          icon: "description"
+                          icon: "description",
                         };
                       }),
-                      icon: "question"
+                      icon: "question",
                     };
-                  })
+                  }),
                 };
-              })
+              }),
             });
           }
           if (options) {
             items.push({
               id: id++,
               name: "Options",
-              children: options.map(op => {
+              children: options.map((op) => {
                 return {
                   id: id++,
-                  name: `${op.text} - value: ${op.value}`
+                  name: `${op.text} - value: ${op.value}`,
                 };
-              })
+              }),
             });
           }
         } else if (test.type == "User") {
@@ -224,58 +282,61 @@ export default {
             items.push({
               id: id++,
               name: "Tasks",
-              children: tasks.map(task => {
+              children: tasks.map((task) => {
                 return {
                   id: id++,
                   name: task.name,
-                  children: Object.entries(task).map(item => {
+                  children: Object.entries(task).map((item) => {
                     return {
                       id: id++,
                       name: `${item[0]}: ${item[1]}`,
-                      icon: "item"
+                      icon: "item",
                     };
                   }),
-                  icon: "question"
+                  icon: "question",
                 };
-              })
+              }),
             });
           }
           if (preTest) {
             items.push({
               id: id++,
               name: "Pre Test",
-              children: Object.entries(preTest).map(item => {
+              children: Object.entries(preTest).map((item) => {
                 return {
                   id: id++,
                   name: `${item[0]}: ${item[1]}`,
-                  icon: "item"
+                  icon: "item",
                 };
-              })
+              }),
             });
           }
           if (postTest) {
             items.push({
               id: id++,
               name: "Post Test",
-              children: Object.entries(postTest).map(item => {
+              children: Object.entries(postTest).map((item) => {
                 return {
                   id: id++,
                   name: `${item[0]}: ${item[1]}`,
-                  icon: "item"
+                  icon: "item",
                 };
-              })
+              }),
             });
           }
         }
       }
 
       return items;
-    }
+    },
   },
   watch: {
     reports() {
       if (Object.keys(this.reports).length) this.loading = false;
-    }
+    },
+    itemSelected() {
+      console.log("Item", this.itemSelected);
+    },
   },
   created() {
     if (!this.$store.getters.reports) {
@@ -288,13 +349,13 @@ export default {
 
     if (!this.$store.test && this.id !== null && this.id !== undefined) {
       this.$store.dispatch("getTest", {
-        id: this.$store.getters.user.myTests.find(test => {
+        id: this.$store.getters.user.myTests.find((test) => {
           return test.reports == this.id;
-        }).id
+        }).id,
       });
     }
     if (!this.$store.getters.users) this.$store.dispatch("getUsers", {});
-  }
+  },
 };
 </script>
 
@@ -304,10 +365,29 @@ export default {
   font-style: normal;
   font-weight: 200;
   font-size: 18.1818px;
-  line-height: 21px;
   align-items: flex-end;
   color: #000000;
-  margin-bottom: 0px;
-  padding-bottom: 0px;
+  margin-bottom: 4px;
+  padding-bottom: 2px;
+}
+.list-scroll {
+  overflow: auto;
+}
+.list-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+/* Track */
+.list-scroll::-webkit-scrollbar-track {
+  background: none;
+}
+/* Handle */
+.list-scroll::-webkit-scrollbar-thumb {
+  background: #ffcd86;
+  border-radius: 4px;
+}
+/* Handle on hover */
+.list-scroll::-webkit-scrollbar-thumb:hover {
+  background: #fca326;
+  /* background: #515069; */
 }
 </style>
