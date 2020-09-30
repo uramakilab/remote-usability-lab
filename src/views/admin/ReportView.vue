@@ -333,10 +333,7 @@ export default {
   watch: {
     reports() {
       if (Object.keys(this.reports).length) this.loading = false;
-    },
-    itemSelected() {
-      console.log("Item", this.itemSelected);
-    },
+    }
   },
   created() {
     if (!this.$store.getters.reports) {
