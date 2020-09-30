@@ -77,7 +77,7 @@
               </v-list>
             </v-col>
 
-            <v-divider vertical></v-divider>
+            <v-divider vertical v-if="heuristicSelect != null"></v-divider>
 
             <!--Content-->
             <v-col
