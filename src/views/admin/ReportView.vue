@@ -126,10 +126,14 @@
                   }}</v-subheader>
                   <v-divider></v-divider>
                   <v-treeview
-                    v-if="itemSelected == 0"
                     selectable
-                    :items="items"
+                    return-object
+                    v-model="listItems[itemSelected].selected"
+                    @input="buildPrint"
+                    color="#FCA326"
+                    :items="listItems[itemSelected].items"
                   ></v-treeview>
+                  {{ objectPrint }}
                 </v-col>
               </v-row>
             </v-card>
@@ -150,7 +154,7 @@ export default {
   components: {
     ShowInfo,
     Intro,
-    Snackbar,
+    Snackbar
   },
   data: () => ({
     headers: [
@@ -158,7 +162,7 @@ export default {
       { text: "Last Update", value: "log.date" },
       { text: "Progress", value: "progress", justify: "center" },
       { text: "Status", value: "log.status" },
-      { text: "More", value: "more", justify: "end" },
+      { text: "More", value: "more", justify: "end" }
     ],
     loading: true,
     dialog: false,
@@ -166,55 +170,214 @@ export default {
     report: null,
     tab: 0,
     itemSelected: null,
-    listItems: [
-      {
-        title: "Test",
-        icon: "mdi-file-document-edit",
-        id: 0,
-      },
-      {
-        title: "Answers",
-        icon: "mdi-order-bool-ascending-variant",
-        id: 1,
-      },
-      {
-        title: "Analytics",
-        icon: "mdi-chart-bar",
-        id: 2,
-      },
-      {
-        title: "Cooperators",
-        icon: "mdi-account-group",
-        id: 3,
-      },
-    ],
+    treeAnswers: [],
+    treeAnalytic: [],
+    treeCooperators: [],
+    treeReport: [],
+    objectPrint: {
+      headers: {},
+      content: []
+    }
   }),
   methods: {
+    buildPrint() {
+      // console.log(this.listItems[this.itemSelected])
+      if (this.listItems[this.itemSelected].title == "Reports")
+        this.updateRepotPrint(this.listItems[this.itemSelected].selected);
+      if (this.listItems[this.itemSelected].title == "Answers")
+        this.updateAnswersPrint(this.listItems[this.itemSelected].selected);
+    },
+    async updateRepotPrint(item) {
+      let content = this.objectPrint.content.find(el => el.title == "Reports");
+      if (!item.length) {
+        if (content) {
+          this.objectPrint.content.splice(content, 1);
+        }
+      } else {
+        if (!this.reports && this.reports.id !== this.test.reports)
+          await this.$store.dispatch("getReports", { id: this.id });
+        if (!content) {
+          this.objectPrint.content.push({
+            title: "Reports",
+            content: [
+              {
+                title: "Evaluator Status",
+                content: this.reports.reports
+              }
+            ]
+          });
+        }
+      }
+    },
+    async updateAnswersPrint(item) {
+      let content = this.objectPrint.content.find(el => el.title == "Answers");
+      if (!item.length) {
+        if (content) {
+          this.objectPrint.content.splice(content, 1);
+        }
+      } else {
+        if (
+          !this.answers ||
+          (this.answers.id = undefined && this.answers.id !== this.test.answers)
+        )
+          await this.$store.dispatch("getAnswers", { id: this.test.answers });
+
+        //Create Answer
+        if (!content) {
+          this.objectPrint.content.push({
+            title: "Answers",
+            content: []
+          });
+          content = this.objectPrint.content.find(el => el.title == "Answers");
+        }
+        item.forEach(el => {
+          //Statistic
+          //Evaluator
+          //Heuristic
+          let dir = el.id.split("/");
+
+          switch (dir[0]) {
+            case "Statistic":
+              content = content.find(el => el.title == "Answers");
+              var ctx = this.$store.getters.getFinalResult;
+              content.content.push({
+                title: el.name,
+                content: [ctx]
+              });
+
+              break;
+            case "Evaluator":
+              break;
+            case "Heuristic":
+              break;
+          }
+        });
+      }
+    },
     removeReport(report) {
       this.$store
         .dispatch("removeReport", {
           docId: this.id,
           element: {
-            id: report.uid,
+            id: report.uid
           },
-          param: "reports",
+          param: "reports"
         })
         .then(() => {
           this.$store.commit("setSuccess", "Report successfully deleted");
           this.loadingBtn = false;
           this.dialog = false;
         })
-        .catch((err) => {
+        .catch(err => {
           this.$store.commit("setError", err);
         });
     },
     goToCoops() {
       this.$emit("goToCoops");
     },
+    setTreesHeuristics() {
+      this.treeAnswers = [];
+      this.treeAnalytic = [];
+      this.treeCooperators = [];
+      this.treeReport = [];
+
+      //Set Report Tree
+      this.treeReport.push({
+        id: "evaluatorsStatus",
+        name: "Evaluators Status"
+      });
+
+      //Set Answers Tree
+      id = 0;
+      this.treeAnswers.push(
+        {
+          id: "Statistic",
+          name: "Statistic"
+        },
+        {
+          id: id++,
+          name: "Evaluator",
+          children: [
+            { id: "Evaluator/Table", name: "Table" },
+            { id: "Evaluator/Graphic", name: "Graphic" }
+          ]
+        },
+        {
+          id: id++,
+          name: "Heuristic",
+          children: [
+            {
+              id: "Heuristic/Answers by Evaluator",
+              name: "Answers by Evaluator"
+            },
+            {
+              id: "Heuristic/Answers by Heuristic",
+              name: "Answers by Heuristic"
+            },
+            { id: "Heuristic/Graphic", name: "Graphic" }
+          ]
+        }
+      );
+
+      //Set Analytic Tree
+      let id = 0;
+      let heuristics = this.test.heuristics;
+      if (heuristics) {
+        this.treeAnalytic.push({
+          id: id++,
+          name: "Heuristics",
+          children: heuristics.map(h => {
+            return {
+              id: id++,
+              name: h.title,
+              children: [
+                { id: id++, name: "Data Table" },
+                ...h.questions.map(q => {
+                  return {
+                    id: id++,
+                    name: q.title,
+                    children: [
+                      { id: id++, name: "Comments" },
+                      { id: id++, name: "Graphic" }
+                    ]
+                  };
+                })
+              ]
+            };
+          })
+        });
+      }
+
+      //Set Cooperators Tree
+      id = 0;
+      this.treeCooperators.push(
+        {
+          id: id++,
+          name: "Evaluators"
+        },
+        {
+          id: id++,
+          name: "Guests"
+        },
+        {
+          id: id++,
+          name: "Administrators"
+        }
+      );
+    }
   },
   computed: {
+    test() {
+      return this.$store.getters.test;
+    },
     reports() {
       return this.$store.getters.reports || Object.assign({}, { reports: [] });
+    },
+    cooperators() {
+      return this.$store.getters.cooperators;
+    },
+    answers() {
+      return this.$store.getters.answers;
     },
     dialogText() {
       return (
@@ -223,10 +386,7 @@ export default {
         `'s report? This action can't be undone`
       );
     },
-    test() {
-      return this.$store.getters.test;
-    },
-    items() {
+    treeTest() {
       let items = [];
 
       if (this.test) {
@@ -239,40 +399,39 @@ export default {
             items.push({
               id: id++,
               name: "Heuristics",
-              children: heuristics.map((h) => {
+              children: heuristics.map(h => {
                 return {
                   id: id++,
                   name: h.title,
-                  children: h.questions.map((q) => {
+                  children: h.questions.map(q => {
                     return {
                       id: id++,
                       name: q.title,
-                      children: q.descriptions.map((d) => {
+                      children: q.descriptions.map(d => {
                         return {
                           id: id++,
-                          name: d.title,
-                          icon: "description",
+                          name: d.title
                         };
-                      }),
-                      icon: "question",
+                      })
                     };
-                  }),
+                  })
                 };
-              }),
+              })
             });
           }
           if (options) {
             items.push({
               id: id++,
               name: "Options",
-              children: options.map((op) => {
+              children: options.map(op => {
                 return {
                   id: id++,
-                  name: `${op.text} - value: ${op.value}`,
+                  name: `${op.text} - value: ${op.value}`
                 };
-              }),
+              })
             });
           }
+          this.setTreesHeuristics();
         } else if (test.type == "User") {
           let id = 0;
           let tasks = test.tasks;
@@ -282,53 +441,87 @@ export default {
             items.push({
               id: id++,
               name: "Tasks",
-              children: tasks.map((task) => {
+              children: tasks.map(task => {
                 return {
                   id: id++,
                   name: task.name,
-                  children: Object.entries(task).map((item) => {
+                  children: Object.entries(task).map(item => {
                     return {
                       id: id++,
-                      name: `${item[0]}: ${item[1]}`,
-                      icon: "item",
+                      name: `${item[0]}: ${item[1]}`
                     };
-                  }),
-                  icon: "question",
+                  })
                 };
-              }),
+              })
             });
           }
           if (preTest) {
             items.push({
               id: id++,
               name: "Pre Test",
-              children: Object.entries(preTest).map((item) => {
+              children: Object.entries(preTest).map(item => {
                 return {
                   id: id++,
-                  name: `${item[0]}: ${item[1]}`,
-                  icon: "item",
+                  name: `${item[0]}: ${item[1]}`
                 };
-              }),
+              })
             });
           }
           if (postTest) {
             items.push({
               id: id++,
               name: "Post Test",
-              children: Object.entries(postTest).map((item) => {
+              children: Object.entries(postTest).map(item => {
                 return {
                   id: id++,
-                  name: `${item[0]}: ${item[1]}`,
-                  icon: "item",
+                  name: `${item[0]}: ${item[1]}`
                 };
-              }),
+              })
             });
           }
         }
       }
-
       return items;
     },
+    listItems() {
+      return [
+        {
+          title: "Test",
+          icon: "mdi-file-document-edit",
+          items: this.treeTest,
+          selected: [],
+          id: 0
+        },
+        {
+          title: "Reports",
+          icon: "mdi-chart-bar",
+          items: this.treeReport,
+          selected: [],
+          id: 1
+        },
+        {
+          title: "Answers",
+          icon: "mdi-order-bool-ascending-variant",
+          items: this.treeAnswers,
+          selected: [],
+          id: 2
+        },
+        {
+          title: "Analytics",
+          icon: "mdi-chart-bar",
+          items: this.treeAnalytic,
+          selected: [],
+          id: 3
+        },
+        {
+          title: "Cooperators",
+          icon: "mdi-account-group",
+          items: this.treeCooperators,
+          selected: [],
+          id: 4
+        }
+      ];
+    }
   },
   watch: {
     reports() {
@@ -346,13 +539,13 @@ export default {
 
     if (!this.$store.test && this.id !== null && this.id !== undefined) {
       this.$store.dispatch("getTest", {
-        id: this.$store.getters.user.myTests.find((test) => {
+        id: this.$store.getters.user.myTests.find(test => {
           return test.reports == this.id;
-        }).id,
+        }).id
       });
     }
     if (!this.$store.getters.users) this.$store.dispatch("getUsers", {});
-  },
+  }
 };
 </script>
 
