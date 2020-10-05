@@ -396,14 +396,14 @@ export default {
           filter: "Evaluator"
         },
         {
-          id: id++,
-          name: "cooperators.guests",
+          id: "cooperators.guests",
+          name: "Guests",
           value: this.getCooperatorsBy,
           filter: "Guest"
         },
         {
-          id: id++,
-          name: "cooperators.administrators",
+          id:  "cooperators.administrators",
+          name: "Administrators",
           value: this.getCooperatorsBy,
           filter: "Administrator"
         }
