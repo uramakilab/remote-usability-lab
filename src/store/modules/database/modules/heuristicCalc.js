@@ -139,7 +139,7 @@ export function finalResult(answers) {
         sd: null
     };
     let data = evaluatorStatistics(answers)
- 
+
 
     if (data.items.length) {
         let res = data.items.reduce((total, value) => {
@@ -165,60 +165,63 @@ export function finalResult(answers) {
 }
 
 function statistics(data) {
-    let answers = data.answers
+    let answers = data ? data.answers : []
     let resultEvaluator = [];
 
-    //Get Evaluator answers
-    let evaluatorIndex = 1;
-    answers.forEach(evaluator => {
-        let SelectEvaluator = resultEvaluator.find(
-            e => e.id == `Ev${evaluatorIndex}`
-        );
-        if (!SelectEvaluator) {
-            resultEvaluator.push({
-                uid: evaluator.uid,
-                email: evaluator.email,
-                id: `Ev${evaluatorIndex}`,
-                heuristics: [],
-                result: 0
-            });
-            SelectEvaluator = resultEvaluator[
-                resultEvaluator.length - 1
-            ];
-        }
-        //Get Heuristics for evaluators
-        let heurisIndex = 1;
-        evaluator.heuristics.forEach(heuristic => {
-            //Get Questions for heuristic
 
-            let noAplication = 0;
-            let noReply = 0;
-            let res = heuristic.questions.reduce((totalQuestions, question) => {
-                //grouping of answers
-                if (question.res === null) {
-                    noAplication++;
-                } //count answers no aplication
-                if (question.res === "") noReply++;
-                return totalQuestions + Number(question.res); //sum of responses
-            }, 0);
-            if (noAplication == heuristic.questions.length) res = null;
+    if (answers.length) {
+        //Get Evaluator answers
+        let evaluatorIndex = 1;
+        answers.forEach(evaluator => {
+            let SelectEvaluator = resultEvaluator.find(
+                e => e.id == `Ev${evaluatorIndex}`
+            );
+            if (!SelectEvaluator) {
+                resultEvaluator.push({
+                    uid: evaluator.uid,
+                    email: evaluator.email,
+                    id: `Ev${evaluatorIndex}`,
+                    heuristics: [],
+                    result: 0
+                });
+                SelectEvaluator = resultEvaluator[
+                    resultEvaluator.length - 1
+                ];
+            }
+            //Get Heuristics for evaluators
+            let heurisIndex = 1;
+            evaluator.heuristics.forEach(heuristic => {
+                //Get Questions for heuristic
 
-            SelectEvaluator.heuristics.push({
-                id: `H${heurisIndex}`,
-                result: res,
-                totalQuestions: heuristic.total,
-                totalNoAplication: noAplication,
-                totalNoReply: noReply
+                let noAplication = 0;
+                let noReply = 0;
+                let res = heuristic.questions.reduce((totalQuestions, question) => {
+                    //grouping of answers
+                    if (question.res === null) {
+                        noAplication++;
+                    } //count answers no aplication
+                    if (question.res === "") noReply++;
+                    return totalQuestions + Number(question.res); //sum of responses
+                }, 0);
+                if (noAplication == heuristic.questions.length) res = null;
+
+                SelectEvaluator.heuristics.push({
+                    id: `H${heurisIndex}`,
+                    result: res,
+                    totalQuestions: heuristic.total,
+                    totalNoAplication: noAplication,
+                    totalNoReply: noReply
+                });
+                heurisIndex++;
             });
-            heurisIndex++;
+            evaluatorIndex++;
         });
-        evaluatorIndex++;
-    });
 
-    //Calc Final result
-    resultEvaluator.forEach(ev => {
-        ev.result = calcFinalResult(ev.heuristics, data.options);
-    });
+        //Calc Final result
+        resultEvaluator.forEach(ev => {
+            ev.result = calcFinalResult(ev.heuristics, data.options);
+        });
+    }
 
     return resultEvaluator
 }

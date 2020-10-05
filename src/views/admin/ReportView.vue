@@ -130,10 +130,10 @@
                     return-object
                     v-model="listItems[itemSelected].selected"
                     @input="buildPrint"
-                    color="#FCA326"
+                    selected-color="#FCA326"
                     :items="listItems[itemSelected].items"
                   ></v-treeview>
-                  {{ objectPrint }}
+                  <v-btn @click="log">log</v-btn>
                 </v-col>
               </v-row>
             </v-card>
@@ -168,7 +168,7 @@ export default {
     dialog: false,
     loadingBtn: false,
     report: null,
-    tab: 0,
+    tab: 1,
     itemSelected: null,
     treeAnswers: [],
     treeAnalytic: [],
@@ -177,82 +177,83 @@ export default {
     objectPrint: {
       headers: {},
       content: []
-    }
+    },
+    value: ""
   }),
   methods: {
-    buildPrint() {
-      // console.log(this.listItems[this.itemSelected])
-      if (this.listItems[this.itemSelected].title == "Reports")
-        this.updateRepotPrint(this.listItems[this.itemSelected].selected);
-      if (this.listItems[this.itemSelected].title == "Answers")
-        this.updateAnswersPrint(this.listItems[this.itemSelected].selected);
-    },
-    async updateRepotPrint(item) {
-      let content = this.objectPrint.content.find(el => el.title == "Reports");
-      if (!item.length) {
-        if (content) {
-          this.objectPrint.content.splice(content, 1);
-        }
-      } else {
-        if (!this.reports && this.reports.id !== this.test.reports)
-          await this.$store.dispatch("getReports", { id: this.id });
-        if (!content) {
-          this.objectPrint.content.push({
-            title: "Reports",
-            content: [
-              {
-                title: "Evaluator Status",
-                content: this.reports.reports
-              }
-            ]
-          });
-        }
-      }
-    },
-    async updateAnswersPrint(item) {
-      let content = this.objectPrint.content.find(el => el.title == "Answers");
-      if (!item.length) {
-        if (content) {
-          this.objectPrint.content.splice(content, 1);
-        }
-      } else {
-        if (
-          !this.answers ||
-          (this.answers.id = undefined && this.answers.id !== this.test.answers)
-        )
-          await this.$store.dispatch("getAnswers", { id: this.test.answers });
-
-        //Create Answer
-        if (!content) {
-          this.objectPrint.content.push({
-            title: "Answers",
-            content: []
-          });
-          content = this.objectPrint.content.find(el => el.title == "Answers");
-        }
-        item.forEach(el => {
-          //Statistic
-          //Evaluator
-          //Heuristic
-          let dir = el.id.split("/");
-
-          switch (dir[0]) {
-            case "Statistic":
-              content = content.find(el => el.title == "Answers");
-              var ctx = this.$store.getters.getFinalResult;
-              content.content.push({
-                title: el.name,
-                content: [ctx]
+    async log() {
+      let objectPrint = {};
+      await this.listItems.forEach(item => {
+        item.selected.forEach(selected => {
+          if (selected.value)
+            Promise.resolve(selected.value()).then(function(value) {
+              objectPrint = Object.assign(objectPrint, {
+                [selected.id]: value
               });
-
-              break;
-            case "Evaluator":
-              break;
-            case "Heuristic":
-              break;
-          }
+            });
         });
+      });
+      console.log("PDF", objectPrint);
+    },
+    buildPrint(item) {
+      console.log(this.listItems[this.itemSelected]);
+      if (item.length)
+        item.forEach(element => {
+          if (element.value)
+            Promise.resolve(element.value()).then(function(value) {
+              console.log(value);
+            });
+        });
+    },
+    getEvaluatorStatus() {
+      if (!this.reports && this.reports.id !== this.test.reports)
+        this.$store.dispatch("getReports", { id: this.id });
+
+      return this.reports.reports;
+    },
+    async getAnswers() {
+      if (!this.answers)
+        await this.$store.dispatch("getAnswers", { id: this.test.answers });
+      else {
+        if (this.answers.id !== this.test.answers)
+          await this.$store.dispatch("getAnswers", { id: this.test.answers });
       }
+    },
+    async getStatistic() {
+      await this.getAnswers();
+      return this.$store.getters.getFinalResult;
+    },
+    async getEvaluatorTable() {
+      await this.getAnswers();
+      return this.$store.getters.getEvaluatorByStatistics;
+    },
+    async getEvaluatorGraphic() {
+      await this.getAnswers();
+      let evaluatorStatistics = this.$store.getters.getEvaluatorByStatistics;
+      return {
+        labels: evaluatorStatistics.items.map(
+          item => `${item.evaluator} - ${item.result}%`
+        ),
+
+        data: evaluatorStatistics.items.map(item => item.result)
+      };
+    },
+    async getAnswersByEvaluator() {
+      await this.getAnswers();
+      return this.$store.getters.getHeuristicsByEvaluator;
+    },
+    async getAnswersByHeuristic() {
+      await this.getAnswers();
+      return this.$store.getters.getHeuristicsbytStatistics;
+    },
+    async getHeuristicGraphic() {
+      await this.getAnswers();
+      let heuristicsStatistics = this.$store.getters.getHeuristicsbytStatistics;
+      return {
+        labels: heuristicsStatistics.items.map(item => item.name),
+        data: heuristicsStatistics.items.map(item => item.average),
+        legend: "Average"
+      };
     },
     removeReport(report) {
       this.$store
@@ -284,7 +285,8 @@ export default {
       //Set Report Tree
       this.treeReport.push({
         id: "evaluatorsStatus",
-        name: "Evaluators Status"
+        name: "Evaluators Status",
+        value: this.getEvaluatorStatus
       });
 
       //Set Answers Tree
@@ -292,14 +294,23 @@ export default {
       this.treeAnswers.push(
         {
           id: "Statistic",
-          name: "Statistic"
+          name: "Statistic",
+          value: this.getStatistic
         },
         {
           id: id++,
           name: "Evaluator",
           children: [
-            { id: "Evaluator/Table", name: "Table" },
-            { id: "Evaluator/Graphic", name: "Graphic" }
+            {
+              id: "Evaluator/Table",
+              name: "Table",
+              value: this.getEvaluatorTable
+            },
+            {
+              id: "Evaluator/Graphic",
+              name: "Graphic",
+              value: this.getEvaluatorGraphic
+            }
           ]
         },
         {
@@ -308,13 +319,19 @@ export default {
           children: [
             {
               id: "Heuristic/Answers by Evaluator",
-              name: "Answers by Evaluator"
+              name: "Answers by Evaluator",
+              value: this.getAnswersByEvaluator
             },
             {
               id: "Heuristic/Answers by Heuristic",
-              name: "Answers by Heuristic"
+              name: "Answers by Heuristic",
+              value: this.getAnswersByHeuristic
             },
-            { id: "Heuristic/Graphic", name: "Graphic" }
+            {
+              id: "Heuristic/Graphic",
+              name: "Graphic",
+              value: this.getHeuristicGraphic
+            }
           ]
         }
       );

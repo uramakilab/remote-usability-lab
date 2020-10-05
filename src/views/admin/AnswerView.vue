@@ -317,13 +317,13 @@ export default {
       return this.$store.getters.getHeuristicsByEvaluator;
     },
     heuristicsStatistics() {
-      return this.$store.getters.getHeuristicsbytStatistics 
+      return this.$store.getters.getHeuristicsbytStatistics;
     },
     evaluatorStatistics() {
-      return this.$store.getters.getEvaluatorByStatistics 
+      return this.$store.getters.getEvaluatorByStatistics;
     },
     finalResult() {
-      return this.$store.getters.getFinalResult
+      return this.$store.getters.getFinalResult;
     },
     answers() {
       return this.$store.getters.answers || [];
