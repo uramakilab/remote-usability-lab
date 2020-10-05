@@ -129,11 +129,11 @@
                     selectable
                     return-object
                     v-model="listItems[itemSelected].selected"
-                    @input="buildPrint"
+                    @input="listenChanges"
                     selected-color="#FCA326"
                     :items="listItems[itemSelected].items"
                   ></v-treeview>
-                  <v-btn @click="log">log</v-btn>
+                  <v-btn @click="buildPrint">log</v-btn>
                 </v-col>
               </v-row>
             </v-card>
@@ -181,12 +181,14 @@ export default {
     value: ""
   }),
   methods: {
-    async log() {
+    async buildPrint() {
       let objectPrint = {};
       await this.listItems.forEach(item => {
         item.selected.forEach(selected => {
           if (selected.value)
-            Promise.resolve(selected.value()).then(function(value) {
+            Promise.resolve(
+              selected.value(selected.filter ? selected.filter : "")
+            ).then(function(value) {
               objectPrint = Object.assign(objectPrint, {
                 [selected.id]: value
               });
@@ -195,12 +197,14 @@ export default {
       });
       console.log("PDF", objectPrint);
     },
-    buildPrint(item) {
+    listenChanges(item) {
       console.log(this.listItems[this.itemSelected]);
       if (item.length)
         item.forEach(element => {
           if (element.value)
-            Promise.resolve(element.value()).then(function(value) {
+            Promise.resolve(
+              element.value(element.filter ? element.filter : null)
+            ).then(function(value) {
               console.log(value);
             });
         });
@@ -217,6 +221,18 @@ export default {
       else {
         if (this.answers.id !== this.test.answers)
           await this.$store.dispatch("getAnswers", { id: this.test.answers });
+      }
+    },
+    async getCooperators() {
+      if (!this.cooperators)
+        await this.$store.dispatch("getCooperators", {
+          id: this.test.cooperators
+        });
+      else {
+        if (this.cooperators.id !== this.test.cooperators)
+          await this.$store.dispatch("getCooperators", {
+            id: this.test.cooperators
+          });
       }
     },
     async getStatistic() {
@@ -255,6 +271,13 @@ export default {
         legend: "Average"
       };
     },
+    async getCooperatorsBy(filter) {
+      await this.getCooperators();
+      let cooperators = this.cooperators.cooperators;
+      return cooperators.filter(item => {
+        return item.accessLevel.text == filter;
+      });
+    },
     removeReport(report) {
       this.$store
         .dispatch("removeReport", {
@@ -284,51 +307,50 @@ export default {
 
       //Set Report Tree
       this.treeReport.push({
-        id: "evaluatorsStatus",
+        id: "reports.evaluatorsStatus",
         name: "Evaluators Status",
         value: this.getEvaluatorStatus
       });
 
       //Set Answers Tree
-      id = 0;
       this.treeAnswers.push(
         {
-          id: "Statistic",
+          id: "answers.statistic",
           name: "Statistic",
           value: this.getStatistic
         },
         {
-          id: id++,
+          id: "answers",
           name: "Evaluator",
           children: [
             {
-              id: "Evaluator/Table",
+              id: "answers.evaluator.table",
               name: "Table",
               value: this.getEvaluatorTable
             },
             {
-              id: "Evaluator/Graphic",
+              id: "answers.evaluator.graphic",
               name: "Graphic",
               value: this.getEvaluatorGraphic
             }
           ]
         },
         {
-          id: id++,
+          id: "heuristic",
           name: "Heuristic",
           children: [
             {
-              id: "Heuristic/Answers by Evaluator",
+              id: "heuristic.answersByEvaluator",
               name: "Answers by Evaluator",
               value: this.getAnswersByEvaluator
             },
             {
-              id: "Heuristic/Answers by Heuristic",
+              id: "heuristic.answersByHeuristic",
               name: "Answers by Heuristic",
               value: this.getAnswersByHeuristic
             },
             {
-              id: "Heuristic/Graphic",
+              id: "heuristic.graphic",
               name: "Graphic",
               value: this.getHeuristicGraphic
             }
@@ -366,19 +388,24 @@ export default {
       }
 
       //Set Cooperators Tree
-      id = 0;
       this.treeCooperators.push(
         {
-          id: id++,
-          name: "Evaluators"
+          id: "cooperators.evaluators",
+          name: "Evaluators",
+          value: this.getCooperatorsBy,
+          filter: "Evaluator"
         },
         {
           id: id++,
-          name: "Guests"
+          name: "cooperators.guests",
+          value: this.getCooperatorsBy,
+          filter: "Guest"
         },
         {
           id: id++,
-          name: "Administrators"
+          name: "cooperators.administrators",
+          value: this.getCooperatorsBy,
+          filter: "Administrator"
         }
       );
     }
