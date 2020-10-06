@@ -12,6 +12,7 @@
     @closeIntro="intro = false"
   />
   <v-row justify="center" v-else-if="cooperators && showCoops">
+    <v-btn @click="comboboxKey++">log</v-btn>
     <v-container class="ma-0 pa-0">
       <Snackbar />
 
@@ -45,6 +46,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
       <v-tooltip left v-if="change">
         <template v-slot:activator="{ on, attrs }">
           <v-btn
@@ -55,7 +57,7 @@
             bottom
             right
             color="#F9A826"
-            @click="submit(), (change = false)"
+            @click="pushToArray(), (change = false)"
             v-bind="attrs"
             v-on="on"
           >
@@ -67,25 +69,51 @@
 
       <ShowInfo title="Cooperators">
         <div class="ma-0 pa-0" style="background: #f5f7ff" slot="content">
-          <v-combobox
-            :hide-no-data="false"
-            style="background: #f5f7ff"
-            v-model="email"
-            :items="filteredUsers"
-            item-text="email"
-            label="Add cooperator"
-            @keydown.native.enter="pushToArray()"
-            ref="combobox"
-            dense
-            color="#fca326"
-            prepend-icon="mdi-account-multiple-plus"
-            class="mx-4 pt-4"
+          <v-chip
+            class="ml-2 mt-2"
+            v-for="(coop, i) in selectedCoops"
+            :key="i"
+            @click:close="removeSelectedCoops(i)"
+            close
+            >{{ typeof coop == "object" ? coop.email : coop }}</v-chip
           >
-            <template v-slot:no-data
-              >There are no users registered with that email, press enter to add
-              anyways.</template
-            >
-          </v-combobox>
+          <v-row class="ma-0 pa-0 pt-3" align="center">
+            <v-col class="ma-0 pa-0" cols="12" md="10">
+              <v-combobox
+                :hide-no-data="false"
+                :autofocus="comboboxKey == 0 ? false : true"
+                style="background: #f5f7ff"
+                :items="filteredUsers"
+                item-text="email"
+                label="Select cooperator"
+                @input="validateEmail()"
+                v-model="comboboxModel"
+                multiple
+                :key="comboboxKey"
+                ref="combobox"
+                outlined
+                dense
+                color="#fca326"
+                class="mx-2"
+              >
+                <template v-slot:no-data
+                  >There are no users registered with that email, press enter to
+                  select anyways.</template
+                >
+              </v-combobox>
+            </v-col>
+            <v-col class="ma-0 pa-0" cols="12" md="2">
+              <v-select
+                v-model="selectedRole"
+                class="mx-2"
+                label="Role"
+                color="#fca326"
+                outlined
+                dense
+                :items="roleOptions"
+              ></v-select>
+            </v-col>
+          </v-row>
           <v-data-table
             dense
             style="background: #f5f7ff"
@@ -111,15 +139,16 @@
               <v-select
                 color="#fca326"
                 style="max-width: 200px"
-                @input="setValue"
-                @change="recordChange(Object.assign({}, item))"
+                @change="changeRole(item, $event)"
                 :value="item.accessLevel"
+                :ref="'select' + cooperatorsEdit.indexOf(item)"
                 return-object
                 dense
                 :items="roleOptions"
                 :v-text="item.accessLevel.text"
                 :disabled="!item.invited || item.accepted ? false : true"
                 class="mt-3"
+                :key="dataTableKey"
               ></v-select>
             </template>
 
@@ -168,7 +197,7 @@
                   </v-list-item>
 
                   <v-list-item
-                    @click="removeCoop(item), removeFromList(item)"
+                    @click="removeCoop(item)"
                     v-if="item.accepted != null"
                   >
                     <v-list-item-title>Remove cooperator</v-list-item-title>
@@ -208,11 +237,7 @@ export default {
   data: () => ({
     object: null,
     change: false,
-    edited: null,
     cooperatorsEdit: [],
-    editedCoops: [],
-    deletedCoops: [],
-    userSelected: {},
     headers: [
       { text: "User", value: "email" },
       { text: "Role", value: "accessLevel" },
@@ -221,39 +246,60 @@ export default {
       { text: "More", value: "more", sortable: false },
     ],
     roleOptions: [
-      { text: "Evaluator", value: 2 },
-      { text: "Guest", value: 1 },
       { text: "Administrator", value: 0 },
+      { text: "Guest", value: 1 },
+      { text: "Evaluator", value: 2 },
     ],
     dialog: false,
     intro: null,
     email: "",
+    selectedCoops: [],
+    comboboxModel: [],
+    comboboxKey: 0,
+    selectedRole: 1,
     showCoops: false,
     verified: false,
+    dataTableKey: 0,
   }),
   methods: {
-    setValue(value) {
-      this.edited = value;
+    removeSelectedCoops(index) {
+      this.selectedCoops.splice(index, 1);
+    },
+    changeRole(item, event) {
+      let index = this.cooperatorsEdit.indexOf(item);
+      let newCoop = Object.assign({}, item);
+      newCoop.accessLevel = event;
+
+      if (item.accessLevel.value !== event.value) {
+        let ok = confirm(
+          `Are you sure you want to change ${item.email}'s role from "${item.accessLevel.text}" to "${event.text}"`
+        );
+        if (ok) {
+          let edited = Object.assign(
+            {},
+            {
+              guest: item,
+              previous: item.accessLevel,
+              current: event,
+            }
+          );
+
+          this.edit(edited);
+          this.$set(this.cooperatorsEdit, index, newCoop); //update on table
+        } else {
+          this.dataTableKey++; //forces data table re-render without changing user role
+        }
+      }
     },
     submit() {
       this.cooperatorsEdit.forEach((guest) => {
-        //Invide new cooperators
-        if (!guest.invited) {
-          this.send(guest);
-        }
+        //Invite new cooperators
+        this.send(guest);
       });
 
-      this.editedCoops.forEach((guest) => {
-        this.edit(guest);
-      });
-
-      this.deletedCoops.forEach((guest) => {
-        this.remove(guest);
-      });
-
-      this.editedCoops = [];
-      this.deletedCoops = [];
       this.change = false;
+      this.selectedCoops = [];
+      this.$refs.combobox.blur();
     },
     remove(guest) {
       if (guest.accessLevel.value != 2) {
@@ -266,12 +312,22 @@ export default {
           })
           .then(() => {
             //Remove element array
-            this.$store.dispatch("removeCooperator", {
-              docId: this.id,
-              element: {
-                id: guest.id,
-              },
-            });
+            this.$store
+              .dispatch("removeCooperator", {
+                docId: this.id,
+                element: {
+                  id: guest.id,
+                },
+              })
+              .then(() => {
+                this.$store.commit(
+                  "setSuccess",
+                  "Cooperator successfuly removed"
+                );
+              })
+              .catch((err) => {
+                this.$store.commit("setError", err);
+              });
           });
       } else {
         this.$store
@@ -291,12 +347,22 @@ export default {
                 param: "reports",
               })
               .then(() => {
-                this.$store.dispatch("removeCooperator", {
-                  docId: this.id,
-                  element: {
-                    id: guest.id,
-                  },
-                });
+                this.$store
+                  .dispatch("removeCooperator", {
+                    docId: this.id,
+                    element: {
+                      id: guest.id,
+                    },
+                  })
+                  .then(() => {
+                    this.$store.commit(
+                      "setSuccess",
+                      "Cooperator successfuly removed"
+                    );
+                  })
+                  .catch((err) => {
+                    this.$store.commit("setError", err);
+                  });
               });
           });
       }
@@ -328,15 +394,20 @@ export default {
                   param: "reports",
                 });
                 let test = Object.assign({}, this.testID);
-                this.$store.dispatch("pushMyCoops", {
-                  docId: guest.guest.id,
-                  element: Object.assign(test, {
-                    accessLevel: guest.current.value,
-                  }),
-                });
+                this.$store
+                  .dispatch("pushMyCoops", {
+                    docId: guest.guest.id,
+                    element: Object.assign(test, {
+                      accessLevel: guest.current.value,
+                    }),
+                  })
+                  .then(() =>
+                    this.$store.commit("setSuccess", "Role successfuly updated")
+                  )
+                  .catch((err) => this.$store.commit("setError", err));
               });
           } else if (
-            //I'll be a Tester
+            //It'll be a Tester
             (guest.previous.value == 1 || guest.previous.value == 0) &&
             guest.current.value == 2
           ) {
@@ -375,14 +446,23 @@ export default {
                   docId: this.testID.reports,
                   element: item,
                 });
-              });
+              })
+              .then(() =>
+                this.$store.commit("setSuccess", "Role successfuly updated")
+              )
+              .catch((err) => this.$store.commit("setError", err));
           } else if (guest.previous.value != 2 && guest.current.value != 2) {
-            this.$store.dispatch("updateAccessLevel", {
-              docId: guest.guest.id,
-              elementId: this.id,
-              element: guest.current.value,
-              param: "accessLevel",
-            });
+            this.$store
+              .dispatch("updateAccessLevel", {
+                docId: guest.guest.id,
+                elementId: this.id,
+                element: guest.current.value,
+                param: "accessLevel",
+              })
+              .then(() =>
+                this.$store.commit("setSuccess", "Role successfuly updated")
+              )
+              .catch((err) => this.$store.commit("setError", err));
           }
         });
     },
@@ -434,10 +514,20 @@ export default {
                   },
                 }
               );
-              this.$store.dispatch("pushLog", {
-                docId: this.test.reports,
-                element: item,
-              });
+              this.$store
+                .dispatch("pushLog", {
+                  docId: this.test.reports,
+                  element: item,
+                })
+                .then(() => {
+                  this.$store.commit(
+                    "setSuccess",
+                    "Invitations sent successfully!"
+                  );
+                })
+                .catch((err) => {
+                  this.$store.commit("setError", err);
+                });
             }
           });
       }
@@ -493,86 +583,80 @@ export default {
       let hasObj = false;
       let obj = null;
 
-      if (typeof this.email == "object") {
-        obj = Object.assign(
-          {},
-          {
-            id: this.email.id,
-            email: this.email.email,
-            invited: false,
-            accepted: null,
-            accessLevel: { text: "Researcher", value: 1 },
-            token: token,
-          }
-        );
-      } else if (!this.email.includes("@") || !this.email.includes("."))
-        alert(this.email + " is not a valid email");
-      else {
-        obj = Object.assign(
-          {},
-          {
-            id: null,
-            email: this.email,
-            invited: false,
-            accepted: null,
-            accessLevel: { text: "Researcher", value: 1 },
-            token: token,
-          }
-        );
-      }
+      this.selectedCoops.forEach((coop) => {
+        if (typeof coop == "object") {
+          obj = Object.assign(
+            {},
+            {
+              id: coop.id,
+              email: coop.email,
+              invited: true,
+              accepted: null,
+              accessLevel: this.roleOptions[this.selectedRole],
+              token: token,
+            }
+          );
+        } else {
+          obj = Object.assign(
+            {},
+            {
+              id: null,
+              email: coop,
+              invited: true,
+              accepted: null,
+              accessLevel: this.roleOptions[this.selectedRole],
+              token: token,
+            }
+          );
+        }
 
-      if (obj !== null)
-        this.cooperatorsEdit.forEach((coop) => {
-          if (coop.email === obj.email) {
-            hasObj = true;
-          }
-        });
+        if (obj !== null)
+          this.cooperatorsEdit.forEach((coopEdit) => {
+            if (coopEdit.email === obj.email) {
+              hasObj = true;
+            }
+          });
 
-      if (!hasObj && obj !== null) {
-        this.cooperatorsEdit.push(obj);
+        if (!hasObj && obj !== null) {
+          this.cooperatorsEdit.push(obj);
+        }
+      });
+
+      this.submit();
+    },
+    validateEmail() {
+      this.email = this.comboboxModel.pop();
+      this.comboboxKey++;
+      
+      if (typeof this.email !== "object" && this.email !== undefined) {
+        //if is object then no need to validate
+        if (this.email.length) {
+          if (!this.email.includes("@") || !this.email.includes(".")) {
+            alert(this.email + " is not a valid email");
+          } else if (!this.selectedCoops.includes(this.email)) {
+            this.selectedCoops.push(this.email);
+            this.change = true;
+          }
+        }
+      } else if (!this.selectedCoops.includes(this.email)) {
+        this.selectedCoops.push(this.email);
         this.change = true;
-
-        if (this.deletedCoops.includes(obj.id))
-          //se add de novo remove do deleted
-          this.deletedCoops.splice(this.deletedCoops.indexOf(obj.id), 1);
-
-        this.userSelected = {};
-        this.email = "";
-        this.$refs.combobox.blur();
       }
     },
     removeCoop(coop) {
-      this.deletedCoops.push(coop);
-      this.change = true;
+      // this.deletedCoops.push(coop);
+      let ok = confirm(
+        `Are you sure you want to remove ${coop.email} from your cooperators?`
+      );
+      if (ok) {
+        let index = this.cooperatorsEdit.indexOf(coop);
+        this.cooperatorsEdit.splice(index, 1);
+        this.remove(coop);
+      }
     },
     removeFromList(coop) {
       let index = this.cooperatorsEdit.indexOf(coop);
       this.cooperatorsEdit.splice(index, 1);
-    },
-    recordChange(item) {
-      let edit = this.editedCoops.find((c) => c.guest.id == item.id);
-      this.change = true;
-
-      if (item.id) {
-        if (!edit && item.accepted) {
-          this.editedCoops.push({
-            guest: item,
-            previous: item.accessLevel,
-            current: this.edited,
-          });
-        } else if (edit && item.accepted) {
-          if (edit.previous.value === this.edited.value) {
-            this.editedCoops.splice(this.editedCoops.indexOf(edit), 1);
-          } else edit.current = this.edited;
-        }
-        let coop = this.cooperatorsEdit.find((coop) => coop.id == item.id);
-        coop.accessLevel = this.edited;
-      } else {
-        let coop = this.cooperatorsEdit.find(
-          (coop) => coop.token == item.token
-        );
-        coop.accessLevel = this.edited;
-      }
     },
     preventNav(event) {
       if (!this.change) return;
@@ -658,7 +742,7 @@ export default {
           undefined
             ? false
             : true;
-        console.log("here", isOwner);
+
         let hasAccess = false;
         if (!isOwner) {
           hasAccess =
@@ -679,7 +763,7 @@ export default {
         if (this.cooperatorsEdit.length == 0) this.intro = true;
         else this.intro = false;
       }
-    },
+    }
   },
   computed: {
     test() {
