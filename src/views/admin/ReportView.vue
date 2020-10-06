@@ -359,25 +359,30 @@ export default {
       );
 
       //Set Analytic Tree
-      let id = 0;
       let heuristics = this.test.heuristics;
       if (heuristics) {
         this.treeAnalytic.push({
-          id: id++,
+          id: "heuristics",
           name: "Heuristics",
-          children: heuristics.map(h => {
+          children: heuristics.map((h, indexH) => {
             return {
-              id: id++,
+              id: `heuristics[${indexH}]`,
               name: h.title,
               children: [
-                { id: id++, name: "Data Table" },
-                ...h.questions.map(q => {
+                { id: `heuristics[${indexH}].dataTable`, name: "Data Table" },
+                ...h.questions.map((q, indexQ) => {
                   return {
-                    id: id++,
+                    id: `heuristics[${indexH}].questions[${indexQ}]`,
                     name: q.title,
                     children: [
-                      { id: id++, name: "Comments" },
-                      { id: id++, name: "Graphic" }
+                      {
+                        id: `heuristics[${indexH}].questions[${indexQ}].comments`,
+                        name: "Comments"
+                      },
+                      {
+                        id: `heuristics[${indexH}].questions[${indexQ}].graphic`,
+                        name: "Graphic"
+                      }
                     ]
                   };
                 })
@@ -402,7 +407,7 @@ export default {
           filter: "Guest"
         },
         {
-          id:  "cooperators.administrators",
+          id: "cooperators.administrators",
           name: "Administrators",
           value: this.getCooperatorsBy,
           filter: "Administrator"

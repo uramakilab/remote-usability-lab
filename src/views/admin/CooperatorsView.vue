@@ -12,7 +12,6 @@
     @closeIntro="intro = false"
   />
   <v-row justify="center" v-else-if="cooperators && showCoops">
-    <v-btn @click="comboboxKey++">log</v-btn>
     <v-container class="ma-0 pa-0">
       <Snackbar />
 
