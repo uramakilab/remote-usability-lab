@@ -182,20 +182,28 @@ export default {
   }),
   methods: {
     async buildPrint() {
-      let objectPrint = {};
-      await this.listItems.forEach(item => {
-        item.selected.forEach(selected => {
-          if (selected.value)
-            Promise.resolve(
-              selected.value(selected.filter ? selected.filter : "")
-            ).then(function(value) {
-              objectPrint = Object.assign(objectPrint, {
-                [selected.id]: value
-              });
-            });
-        });
+      let objectPrint = {
+        type: "heuristic",
+        data: this.test.heuristics
+      };
+      // await this.listItems.forEach(item => {
+      //   item.selected.forEach(selected => {
+      //     if (selected.value)
+      //       Promise.resolve(
+      //         selected.value(selected.filter ? selected.filter : "")
+      //       ).then(function(value) {
+      //         objectPrint = Object.assign(objectPrint, {
+      //           [selected.id]: value
+      //         });
+      //       });
+      //   });
+      // });
+
+      let routeData = this.$router.resolve({
+        path: "/printview"
       });
-      console.log("PDF", objectPrint);
+      let newPage = window.open(routeData.href, "_blank");
+      newPage.objectPrint = objectPrint;
     },
     listenChanges(item) {
       console.log(this.listItems[this.itemSelected]);

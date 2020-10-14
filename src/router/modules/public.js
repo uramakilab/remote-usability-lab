@@ -4,6 +4,8 @@ import SignUp from "@/views/public/SignUpView.vue";
 import Home from "@/views/public/HomeView.vue";
 import LandingPage from "@/views/public/LandingPageView.vue";
 import PageNotFound from "@/views/public/PageNotFoundView.vue";
+import PrintView from "@/views/public/PrintView.vue"
+
 
 export default [
   {
@@ -43,4 +45,11 @@ export default [
     meta: { authorize: [] },
     component: PageNotFound,
   },
+  {
+    path: '/printview',
+    name: "Print",
+    meta: { authorize: [] },
+    component: PrintView,
+    props: true
+  }
 ];

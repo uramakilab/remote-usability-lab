@@ -1,6 +1,6 @@
 <template  >
   <v-app>
-    <Toolbar />
+    <Toolbar id="toolbar" />
 
     <v-main>
       <v-container fluid class="pa-0">
