@@ -2,7 +2,7 @@
  * Class that represents the Log object, where it recorded the evaluator's interactions in the test
  * @type {Log}
  */
-export class Log {
+export default class Log {
 
     /**
      * Create a log

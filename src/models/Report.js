@@ -1,8 +1,10 @@
+import Log from "./Log"
+
 /**
  * Class that represents the report object
  *  @type {Report}
  */
-export class Report {
+export default class Report {
     /**
      * Create a report
      * @param {object} payload - data to crates object  
@@ -13,7 +15,7 @@ export class Report {
     constructor(payload) {
         this._uid = payload.uid
         this._email = payload.email
-        this._log = payload.log
+        this._log = new Log(payload.log)
     }
 
     /**

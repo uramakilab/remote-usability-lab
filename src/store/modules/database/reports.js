@@ -3,6 +3,8 @@
  * @module Reports
  */
 
+import ReportsDocument from "../../../models/ReportsDocument";
+
 export default {
   state: {
     reports: null,
@@ -35,7 +37,6 @@ export default {
     createReport({ dispatch, commit }, payload) {
       commit("setLoading", true);
       payload = Object.assign(payload, { collection: "reports" });
-
       let docRef = dispatch("createObject", payload)
         .then((doc) => {
           return doc.id;
@@ -75,7 +76,7 @@ export default {
       let reps = await dispatch("getObject", payload)
         .catch((err) => commit("setError", "Error in getReports." + err));
 
-      commit("setReports", reps);
+      commit("setReports", new ReportsDocument(reps));
     },
     /**
      * This action adds a new log to the report, using the generic action 

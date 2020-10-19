@@ -1,8 +1,10 @@
+import Report from "./Report"
+
 /**
  * Class that represents the reporting document, where test reports are saved
  * @type {ReportsDocument}
  */
-export class ReportsDocument {
+export default class ReportsDocument {
     /**
      * Create a report document
      * @param {object} payload - data to creates a report documente
@@ -13,7 +15,7 @@ export class ReportsDocument {
     constructor(payload) {
         this._id = payload.id
         this._test = payload.test
-        this._repots = payload.reports
+        this._repots = payload.reports.map(report => new Report(report))
     }
 
 
@@ -58,7 +60,6 @@ export class ReportsDocument {
     removeReport(report) {
         this._repots.slice(this._repots.indexOf(report), 1)
     }
-
 
 
 }

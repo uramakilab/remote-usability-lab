@@ -1,43 +1,54 @@
 <template>
   <div>
     <Snackbar />
-    
+
     <!-- Delete Alert Dialog -->
     <v-dialog v-model="dialog" width="600" persistent>
       <v-card>
-        <v-card-title
-          class="headline error white--text"
-          primary-title
-        >Are you sure you want to delete this report?</v-card-title>
+        <v-card-title class="headline error white--text" primary-title
+          >Are you sure you want to delete this report?</v-card-title
+        >
 
-        <v-card-text>{{dialogText}}</v-card-text>
+        <v-card-text>{{ dialogText }}</v-card-text>
 
         <v-divider></v-divider>
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="grey lighten-3" text @click="dialog = false">Cancel</v-btn>
+          <v-btn class="grey lighten-3" text @click="dialog = false"
+            >Cancel</v-btn
+          >
           <v-btn
             class="red white--text ml-1"
             :loading="loadingBtn"
             text
-            @click="removeReport(report), loadingBtn = true"
-          >Delete</v-btn>
+            @click="removeReport(report), (loadingBtn = true)"
+            >Delete</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-overlay class="text-center" v-model="loading">
-      <v-progress-circular indeterminate color="#fca326" size="50"></v-progress-circular>
+      <v-progress-circular
+        indeterminate
+        color="#fca326"
+        size="50"
+      ></v-progress-circular>
       <div class="white-text mt-3">Loading Reports</div>
     </v-overlay>
 
-    <Intro v-if="reports.reports.length == 0 && !loading" @goToCoops="goToCoops()" />
+    <Intro
+      v-if="reports.reports.length == 0 && !loading"
+      @goToCoops="goToCoops()"
+    />
     <ShowInfo title="Reports" v-else>
       <v-row justify="end" dense slot="top" class="mr-3">
-        <p class="subtitleView">Last Updated: {{new Date().toLocaleString('en')}}</p>
+        <p class="subtitleView">
+          Last Updated: {{ new Date().toLocaleString("en") }}
+        </p>
       </v-row>
-
+      {{ log() }}
       <div slot="content" class="ma-0 pa-0">
         <v-data-table
           style="background: #f5f7ff"
@@ -55,7 +66,7 @@
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item @click="dialog = true, report = item">
+                <v-list-item @click="(dialog = true), (report = item)">
                   <v-list-item-title>Remove Report</v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -63,7 +74,7 @@
           </template>
 
           <template v-slot:item.progress="{ item }">
-            <div>{{item.log.progress}}%</div>
+            <div>{{ item.log.progress }}%</div>
           </template>
         </v-data-table>
       </div>
@@ -89,41 +100,42 @@ export default {
       { text: "Last Update", value: "log.date" },
       { text: "Progress", value: "progress", justify: "center" },
       { text: "Status", value: "log.status" },
-      { text: "More", value: "more", justify: "end" },
+      { text: "More", value: "more", justify: "end" }
     ],
     loading: true,
     dialog: false,
     loadingBtn: false,
-    report: null,
+    report: null
   }),
   methods: {
+    log() {
+      console.log(this.reports);
+    },
     removeReport(report) {
       this.$store
         .dispatch("removeReport", {
           docId: this.id,
           element: {
-            id: report.uid,
+            id: report.uid
           },
-          param: "reports",
+          param: "reports"
         })
         .then(() => {
           this.$store.commit("setSuccess", "Report successfully deleted");
           this.loadingBtn = false;
           this.dialog = false;
         })
-        .catch((err) => {
+        .catch(err => {
           this.$store.commit("setError", err);
         });
     },
     goToCoops() {
       this.$emit("goToCoops");
-    },
+    }
   },
   computed: {
     reports() {
-      return (
-        this.$store.getters.reports || Object.assign({}, { reports: [] })
-      );
+      return this.$store.getters.reports || Object.assign({}, { reports: [] });
     },
     dialogText() {
       return (
@@ -131,12 +143,12 @@ export default {
         (this.report !== null ? this.report.email : "") +
         `'s report? This action can't be undone`
       );
-    },
+    }
   },
   watch: {
     reports() {
       if (Object.keys(this.reports).length) this.loading = false;
-    },
+    }
   },
   created() {
     if (!this.$store.getters.reports) {
@@ -148,12 +160,10 @@ export default {
     }
     this.test = Object.assign(
       {},
-      this.$store.getters.user.myTests.find(
-        (test) => test.reports == this.id
-      )
+      this.$store.getters.user.myTests.find(test => test.reports == this.id)
     );
     if (!this.$store.getters.users) this.$store.dispatch("getUsers", {});
-  },
+  }
 };
 </script>
 
@@ -169,5 +179,4 @@ export default {
   margin-bottom: 0px;
   padding-bottom: 0px;
 }
-
 </style>
