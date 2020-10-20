@@ -122,7 +122,7 @@
             :items-per-page="7"
             items-per-page-text="7"
             :footer-props="{
-              'items-per-page-options': [7],
+              'items-per-page-options': [7]
             }"
           >
             <!-- Email -->
@@ -231,7 +231,7 @@ export default {
     ShowInfo,
     Snackbar,
     Intro,
-    AccessNotAllowed,
+    AccessNotAllowed
   },
   data: () => ({
     object: null,
@@ -242,12 +242,12 @@ export default {
       { text: "Role", value: "accessLevel" },
       { text: "Invited", value: "invited", justify: "center" },
       { text: "Accepted", value: "accepted", justify: "center" },
-      { text: "More", value: "more", sortable: false },
+      { text: "More", value: "more", sortable: false }
     ],
     roleOptions: [
       { text: "Administrator", value: 0 },
       { text: "Guest", value: 1 },
-      { text: "Evaluator", value: 2 },
+      { text: "Evaluator", value: 2 }
     ],
     dialog: false,
     intro: null,
@@ -258,7 +258,7 @@ export default {
     selectedRole: 1,
     showCoops: false,
     verified: false,
-    dataTableKey: 0,
+    dataTableKey: 0
   }),
   methods: {
     removeSelectedCoops(index) {
@@ -279,7 +279,7 @@ export default {
             {
               guest: item,
               previous: item.accessLevel,
-              current: event,
+              current: event
             }
           );
 
@@ -291,7 +291,7 @@ export default {
       }
     },
     submit() {
-      this.cooperatorsEdit.forEach((guest) => {
+      this.cooperatorsEdit.forEach(guest => {
         //Invite new cooperators
         if(!guest.invited)
           this.send(guest);
@@ -332,8 +332,8 @@ export default {
               .dispatch("removeCooperator", {
                 docId: this.id,
                 element: {
-                  id: guest.id,
-                },
+                  id: guest.id
+                }
               })
               .then(() => {
                 this.$store.commit(
@@ -341,7 +341,7 @@ export default {
                   "Cooperator successfuly removed"
                 );
               })
-              .catch((err) => {
+              .catch(err => {
                 this.$store.commit("setError", err);
               });
           });
@@ -358,17 +358,17 @@ export default {
               .dispatch("removeReport", {
                 docId: this.test.reports,
                 element: {
-                  id: guest.id,
+                  id: guest.id
                 },
-                param: "reports",
+                param: "reports"
               })
               .then(() => {
                 this.$store
                   .dispatch("removeCooperator", {
                     docId: this.id,
                     element: {
-                      id: guest.id,
-                    },
+                      id: guest.id
+                    }
                   })
                   .then(() => {
                     this.$store.commit(
@@ -376,7 +376,7 @@ export default {
                       "Cooperator successfuly removed"
                     );
                   })
-                  .catch((err) => {
+                  .catch(err => {
                     this.$store.commit("setError", err);
                   });
               });
@@ -405,7 +405,7 @@ export default {
           docId: this.id,
           elementId: guest.guest.id,
           element: guest.current,
-          param: "accessLevel",
+          param: "accessLevel"
         })
         .then(() => {
           // Cooperator was Tester
@@ -421,22 +421,22 @@ export default {
                 this.$store.dispatch("removeReport", {
                   docId: this.test.reports,
                   element: {
-                    id: guest.id,
+                    id: guest.id
                   },
-                  param: "reports",
+                  param: "reports"
                 });
                 let test = Object.assign({}, this.test);
                 this.$store
                   .dispatch("pushMyCoops", {
                     docId: guest.guest.id,
                     element: Object.assign(test, {
-                      accessLevel: guest.current.value,
-                    }),
+                      accessLevel: guest.current.value
+                    })
                   })
                   .then(() =>
                     this.$store.commit("setSuccess", "Role successfuly updated")
                   )
-                  .catch((err) => this.$store.commit("setError", err));
+                  .catch(err => this.$store.commit("setError", err));
               });
           } else if (
             //It'll be a Tester
@@ -472,8 +472,8 @@ export default {
                     log: {
                       date: new Date().toLocaleString("en-Us"),
                       progress: 0,
-                      status: "In progress",
-                    },
+                      status: "In progress"
+                    }
                   }
                 );
                 this.$store.dispatch("pushLog", {
@@ -484,19 +484,19 @@ export default {
               .then(() =>
                 this.$store.commit("setSuccess", "Role successfuly updated")
               )
-              .catch((err) => this.$store.commit("setError", err));
+              .catch(err => this.$store.commit("setError", err));
           } else if (guest.previous.value != 2 && guest.current.value != 2) {
             this.$store
               .dispatch("updateAccessLevel", {
                 docId: guest.guest.id,
                 elementId: this.id,
                 element: guest.current.value,
-                param: "accessLevel",
+                param: "accessLevel"
               })
               .then(() =>
                 this.$store.commit("setSuccess", "Role successfuly updated")
               )
-              .catch((err) => this.$store.commit("setError", err));
+              .catch(err => this.$store.commit("setError", err));
           }
         });
     },
@@ -510,11 +510,11 @@ export default {
           to: {
             id: guest.id,
             email: guest.email,
-            accessLevel: guest.accessLevel.value,
+            accessLevel: guest.accessLevel.value
           },
           from: {
             id: this.user.uid,
-            email: this.user.email,
+            email: this.user.email
           },
           test: {
             id: this.test.id,
@@ -530,7 +530,7 @@ export default {
           .dispatch("pushNotification", {
             docId: inv.to.id,
             element: inv,
-            param: "notifications",
+            param: "notifications"
           })
           .then(() => {
             this.$set(guest, "invited", true);
@@ -545,14 +545,14 @@ export default {
                   log: {
                     date: new Date().toLocaleString("en-Us"),
                     progress: 0,
-                    status: "Invited",
-                  },
+                    status: "Invited"
+                  }
                 }
               );
               this.$store
                 .dispatch("pushLog", {
                   docId: this.test.reports,
-                  element: item,
+                  element: item
                 })
                 .then(() => {
                   this.$store.commit(
@@ -560,7 +560,7 @@ export default {
                     "Invitations sent successfully!"
                   );
                 })
-                .catch((err) => {
+                .catch(err => {
                   this.$store.commit("setError", err);
                 });
             }
@@ -577,11 +577,11 @@ export default {
         to: {
           id: guest.id,
           email: guest.email,
-          accessLevel: guest.accessLevel.value,
+          accessLevel: guest.accessLevel.value
         },
         from: {
           id: this.user.uid,
-          email: this.user.email,
+          email: this.user.email
         },
         test: {
           id: this.test.id,
@@ -589,14 +589,14 @@ export default {
           type: this.test.type,
           reports: this.test.reports,
           answers: this.test.answers,
-          cooperators: this.test.cooperators,
-        },
+          cooperators: this.test.cooperators
+        }
       };
       this.$store
         .dispatch("pushNotification", {
           docId: inv.to.id,
           element: inv,
-          param: "notifications",
+          param: "notifications"
         })
         .then(() => {
           this.$store
@@ -604,7 +604,7 @@ export default {
               docId: this.id,
               elementId: guest.id,
               element: null,
-              param: "accepted",
+              param: "accepted"
             })
             .then(() => {
               guest.accepted = null;
@@ -618,7 +618,7 @@ export default {
       let hasObj = false;
       let obj = null;
 
-      this.selectedCoops.forEach((coop) => {
+      this.selectedCoops.forEach(coop => {
         if (typeof coop == "object") {
           obj = Object.assign(
             {},
@@ -628,7 +628,7 @@ export default {
               invited: false,
               accepted: null,
               accessLevel: this.roleOptions[this.selectedRole],
-              token: token,
+              token: token
             }
           );
         } else {
@@ -640,13 +640,13 @@ export default {
               invited: false,
               accepted: null,
               accessLevel: this.roleOptions[this.selectedRole],
-              token: token,
+              token: token
             }
           );
         }
 
         if (obj !== null)
-          this.cooperatorsEdit.forEach((coopEdit) => {
+          this.cooperatorsEdit.forEach(coopEdit => {
             if (coopEdit.email === obj.email) {
               hasObj = true;
             }
@@ -709,19 +709,19 @@ export default {
           from: this.user.email,
           testTitle: this.test.title,
           guest: guest,
-          domain: domain,
+          domain: domain
         }
       );
 
       if (guest.accessLevel.value >= 2) {
         email = Object.assign(email, {
           path: "testview",
-          token: guest.token,
+          token: guest.token
         });
       } else {
         email = Object.assign(email, {
           path: "managerview",
-          token: guest.token,
+          token: guest.token
         });
       }
       this.$store.dispatch("sendEmailInvitation", email).then(() => {
@@ -730,7 +730,7 @@ export default {
         Object.assign(guest);
         this.$store.dispatch("pushCooperator", {
           docId: this.id,
-          element: Object.assign({}, guest),
+          element: Object.assign({}, guest)
         });
       });
     },
@@ -739,23 +739,23 @@ export default {
         .dispatch("removeCooperator", {
           docId: this.id,
           element: {
-            id: guest.id,
-          },
+            id: guest.id
+          }
         })
         .then(() => {
           if (guest.id) {
             this.$store.dispatch("removeNotification", {
               docId: guest.id,
-              element: { id: guest.invitation },
+              element: { id: guest.invitation }
             });
           }
           if (guest.accessLevel.value >= 2 && guest.id) {
             this.$store.dispatch("removeReport", {
               docId: this.test.reports,
               element: {
-                id: guest.id,
+                id: guest.id
               },
-              param: "reports",
+              param: "reports"
             });
           }
         });
@@ -779,17 +779,17 @@ export default {
     },
   },
   watch: {
-    cooperators: async function () {
+    cooperators: async function() {
       if (this.cooperators !== null && this.cooperators !== undefined) {
         this.cooperatorsEdit = Array.from(this.cooperators.cooperators);
         if (!this.$store.test) {
           await this.$store.dispatch("getTest", {
-            id: this.cooperators.test.id,
+            id: this.cooperators.test.id
           });
         }
 
         let isOwner =
-          this.user.myTests.find((test) => test.cooperators == this.id) ==
+          this.user.myTests.find(test => test.cooperators == this.id) ==
           undefined
             ? false
             : true;
@@ -798,7 +798,7 @@ export default {
         if (!isOwner) {
           hasAccess =
             this.cooperators.cooperators.find(
-              (coop) =>
+              coop =>
                 coop.email == this.user.email && coop.accessLevel.value == 0
             ) == undefined
               ? false
@@ -833,9 +833,9 @@ export default {
     filteredUsers() {
       let hasUser = null;
       let array = [];
-      this.users.forEach((user) => {
+      this.users.forEach(user => {
         hasUser = false;
-        this.cooperatorsEdit.forEach((coop) => {
+        this.cooperatorsEdit.forEach(coop => {
           if (coop.id === user.id) {
             hasUser = true;
           }
@@ -846,7 +846,7 @@ export default {
     },
     loading() {
       return this.$store.getters.loading;
-    },
+    }
   },
   created() {
     if (!this.$store.getters.cooperators)
@@ -871,7 +871,7 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener("beforeunload", this.preventNav);
-  },
+  }
 };
 </script>
 

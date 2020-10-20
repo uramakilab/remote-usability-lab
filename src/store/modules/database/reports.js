@@ -17,13 +17,18 @@ export default {
   mutations: {
     setReports(state, payload) {
       state.reports = payload;
+    },
+    pushReport(state, payload) {
+      console.log(state.reports)
+      state.reports &&
+        state.reports.pushReport(payload.element)
     }
   },
   actions: {
     /**
      * This action creates a new report, using the generic action "createObject", passing the report data
      * 
-     * @action createReport
+     * @action createReport=reportsDocument
      * @param {object} payload - data to create a report
      * @param {object} payload.data - reports data 
      * @param {object} payload.data.test - header with test data to which the report belongs
@@ -39,6 +44,9 @@ export default {
       payload = Object.assign(payload, { collection: "reports" });
       let docRef = dispatch("createObject", payload)
         .then((doc) => {
+          payload.data = Object.assign(payload.data, { id: doc.id });
+          let reportsDocument = new ReportsDocument(payload.data)
+          commit('setReports', reportsDocument)
           return doc.id;
         })
         .catch((err) => commit("setError", "Error in createReport." + err));
@@ -102,6 +110,9 @@ export default {
       });
 
       dispatch("pushObject", payload)
+        .then(() => {
+          commit('pushReport', payload)
+        })
         .catch((err) => commit("setError", "Error in pushLog." + err));
     },
     /**

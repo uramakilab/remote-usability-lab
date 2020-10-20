@@ -18,6 +18,7 @@ export default class ReportsDocument {
         this._repots = payload.reports.map(report => new Report(report))
     }
 
+    //Getters and Setters
 
     /**
      * Get the reports value
@@ -50,7 +51,8 @@ export default class ReportsDocument {
      * @param {Report} report - a new report
      */
     pushReport(report) {
-        this._repots.push(report)
+        console.log("Push", report)
+        this._repots.push(new Report(report))
     }
 
     /**
@@ -60,6 +62,8 @@ export default class ReportsDocument {
     removeReport(report) {
         this._repots.slice(this._repots.indexOf(report), 1)
     }
+
+
 
 
 }

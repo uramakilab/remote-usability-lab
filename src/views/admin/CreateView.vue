@@ -2,7 +2,9 @@
   <div>
     <h2
       style="font-weight: 400; display: flex; justify-content: center; margin: 30px 0px"
-    >Create a new test</h2>
+    >
+      Create a new test
+    </h2>
 
     <v-row justify="center" style="padding: 0px 30px;">
       <v-row style="max-width: 90%" justify="center">
@@ -10,24 +12,42 @@
           <v-card class="card" flat @click="dialog = true" :ripple="false">
             <v-row align="center">
               <v-col cols="12" md="5">
-                <v-img contain src="@/assets/createView/blankCanvas.svg" max-height="200"></v-img>
+                <v-img
+                  contain
+                  src="@/assets/createView/blankCanvas.svg"
+                  max-height="200"
+                ></v-img>
               </v-col>
               <v-col cols="12" md="6" class="card-text">
                 <div class="card-title">Create a blank test</div>
-                <div>Create a blank test to begin with a completely new and fresh template.</div>
+                <div>
+                  Create a blank test to begin with a completely new and fresh
+                  template.
+                </div>
               </v-col>
             </v-row>
           </v-card>
         </v-col>
         <v-col cols="12" md="6">
-          <v-card class="card" flat @click="pushToFromTemplate()" :ripple="false">
+          <v-card
+            class="card"
+            flat
+            @click="pushToFromTemplate()"
+            :ripple="false"
+          >
             <v-row align="center">
               <v-col cols="12" md="5">
-                <v-img contain src="@/assets/createView/createFromTemplate.svg" max-height="200"></v-img>
+                <v-img
+                  contain
+                  src="@/assets/createView/createFromTemplate.svg"
+                  max-height="200"
+                ></v-img>
               </v-col>
               <v-col cols="12" md="6" class="card-text-box">
                 <div class="card-title">Create from template</div>
-                <div>Create a test based on a template created by one of our users.</div>
+                <div>
+                  Create a test based on a template created by one of our users.
+                </div>
               </v-col>
             </v-row>
           </v-card>
@@ -57,7 +77,7 @@ import FormTestDescription from "@/components/atoms/FormTestDescription";
 
 export default {
   components: {
-    FormTestDescription,
+    FormTestDescription
   },
   data: () => ({
     dialog: false,
@@ -65,13 +85,13 @@ export default {
     test: {
       title: "",
       description: "",
-      type: "",
+      type: ""
     },
-    testID: null,
+    testID: null
   }),
   methods: {
     pushToFromTemplate() {
-        this.$router.push('/fromtemplate');
+      this.$router.push("/fromtemplate");
     },
     async submit() {
       await this.testAssembly(); // build Test
@@ -82,9 +102,9 @@ export default {
       await this.$store
         .dispatch("createTest", {
           collection: "test",
-          data: Object.assign(object, { date: d.toDateString() }),
+          data: Object.assign(object, { date: d.toDateString() })
         })
-        .then((id) => {
+        .then(id => {
           this.testID = id;
           this.$store
             .dispatch("createAnswers", {
@@ -92,16 +112,16 @@ export default {
                 test: {
                   id: id,
                   title: object.title,
-                  type: object.type,
+                  type: object.type
                 },
                 answers: [],
-                answersSheet: object.answersSheet,
-              },
+                answersSheet: object.answersSheet
+              }
             })
-            .then((idAnswers) => {
+            .then(idAnswers => {
               this.$store.dispatch("setAnswerID", {
                 docId: id,
-                data: idAnswers,
+                data: idAnswers
               });
               this.$store
                 .dispatch("createReport", {
@@ -110,15 +130,16 @@ export default {
                       id: id,
                       title: object.title,
                       type: object.type,
-                      answers: idAnswers,
+                      answers: idAnswers
                     },
-                    reports: [],
-                  },
+                    reports: []
+                  }
                 })
-                .then((idReport) => {
+                .then(idReport => {
+                  console.log("idReport", idReport);
                   this.$store.dispatch("setReportID", {
                     docId: id,
-                    data: idReport,
+                    data: idReport
                   });
                   this.$store
                     .dispatch("createCooperators", {
@@ -126,15 +147,15 @@ export default {
                         test: {
                           id: id,
                           title: object.title,
-                          type: object.type,
+                          type: object.type
                         },
-                        cooperators: [],
-                      },
+                        cooperators: []
+                      }
                     })
-                    .then((idCooperators) => {
+                    .then(idCooperators => {
                       this.$store.dispatch("setCooperatorsID", {
                         docId: id,
-                        data: idCooperators,
+                        data: idCooperators
                       });
                       this.$store.dispatch("pushMyTest", {
                         docId: this.user.uid,
@@ -149,13 +170,13 @@ export default {
                           date: d.toDateString(),
                           nCoops: 0
                         },
-                        param: "myTests",
+                        param: "myTests"
                       });
                     });
                 });
             });
         })
-        .catch((err) => {
+        .catch(err => {
           console.error("Error", err);
           successful = false;
         });
@@ -170,15 +191,15 @@ export default {
         this.object = Object.assign(this.object, {
           admin: {
             id: this.user.uid,
-            email: this.user.email,
-          },
+            email: this.user.email
+          }
         });
       }
 
       //Assigning test info
       this.object = Object.assign(this.object, this.test);
       this.object = Object.assign(this.object, {
-        date: new Date().toDateString(),
+        date: new Date().toDateString()
       });
 
       //assigning tasks/heuristics
@@ -187,20 +208,20 @@ export default {
         this.object = Object.assign(this.object, {
           preTest: {
             consent: null,
-            form: null,
-          },
+            form: null
+          }
         });
 
         this.object = Object.assign(this.object, {
           tasks: [],
-          answersSheet: null,
+          answersSheet: null
         });
 
         //assigning post test
         this.object = Object.assign(this.object, {
           postTest: {
-            form: null,
-          },
+            form: null
+          }
         });
       } else if (this.test.type === "Heuristics") {
         this.object = Object.assign(this.object, {
@@ -208,8 +229,8 @@ export default {
           answersSheet: {
             total: 0,
             progress: 0,
-            heuristics: [],
-          },
+            heuristics: []
+          }
         });
 
         this.object = Object.assign(this.object, { options: [] });
@@ -222,14 +243,14 @@ export default {
       if (this.$refs.form.valida()) {
         this.submit();
       }
-    },
+    }
   },
   watch: {
     dialog() {
       this.test = {
         title: "",
         description: "",
-        type: "",
+        type: ""
       };
       this.object = {};
 
@@ -237,13 +258,13 @@ export default {
         this.$refs.form.resetVal();
         this.dialog = false;
       }
-    },
+    }
   },
   computed: {
     user() {
       return this.$store.getters.user;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -282,7 +303,7 @@ export default {
     margin: 20px 0px 0px 0px;
   }
   .card {
-      height: auto;
+    height: auto;
   }
 }
 </style>
