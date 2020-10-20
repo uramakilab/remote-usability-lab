@@ -450,7 +450,7 @@ export default {
 
       if (payload.myAnswers.length) {
         payload.myAnswers.forEach(test => {
-          if (!test.answersSheet.submited) {
+          if (!test.answersSheet.submitted) {
             var log = {
               date: new Date().toLocaleString("en-US"),
               progress: '-',
@@ -467,7 +467,30 @@ export default {
         })
       }
 
-    }
+    },
+    pushMyTemps({ dispatch, commit }, payload) {
+      commit("setLoading", true);
+      payload = Object.assign(payload, { collection: "users" });
 
+      dispatch("pushObject", payload)
+        .catch((err) => commit("setError", "Error in pushMyTemps." + err));
+    },
+    updateMyTemps({ dispatch, commit }, payload) {
+      commit("setLoading", true);
+      payload = Object.assign(payload, {
+        collection: "users",
+        param: "myTemps",
+      });
+
+      dispatch("updateArrayObject", payload)
+        .catch((err) => commit("setError", "Error in updateMyTemps." + err));
+    },
+    removeMyTemps({ dispatch, commit }, payload) {
+      commit("setLoading", true);
+      payload = Object.assign(payload, { collection: "users" });
+
+      dispatch("removeObject", payload)
+        .catch((err) => commit("setError", "Error in removeMyTemps." + err));
+    },
   },
 };

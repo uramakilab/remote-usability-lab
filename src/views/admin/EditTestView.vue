@@ -129,6 +129,9 @@ export default {
   methods: {
     async submit() {
       await this.$store.dispatch("getAnswers", { id: this.test.answers });
+      let today = new Date();
+
+      if(this.object.date !== today.toDateString()) this.object.date = today.toDateString(); //update date if not the same as last update
 
       if ("template" in this.object) this.object.template.upToDate = false; //flag as outdated
       this.$store
@@ -137,18 +140,27 @@ export default {
           data: this.object,
         })
         .then(() => {
-          this.$store.dispatch("updateMyTest", {
-            docId: this.object.admin.id,
-            element: {
+          let element = Object.assign(
+            {},
+            {
               id: this.id,
               title: this.object.title,
               type: this.object.type,
               reports: this.object.reports,
               answers: this.object.answers,
               cooperators: this.object.cooperators,
-              template: this.object.template,
               accessLevel: 0,
-            },
+              date: this.object.date
+            }
+          );
+          if ("template" in this.object)
+            element = Object.assign(element, {
+              template: this.object.template,
+            });
+
+          this.$store.dispatch("updateMyTest", {
+            docId: this.object.admin.id,
+            element: element,
           });
 
           this.answers.answersSheet = this.object.answersSheet;
