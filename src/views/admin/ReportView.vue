@@ -182,10 +182,36 @@ export default {
   }),
   methods: {
     async buildPrint() {
-      let objectPrint = {
-        type: "heuristic",
-        data: this.test.heuristics
-      };
+      let objectPrint = [
+        {
+          type: "heuristic",
+          data: this.test.heuristics
+        },
+        {
+          type: "options",
+          data: this.test.options
+        },
+        {
+          type: "reports",
+          data: this.reports.reports
+        },
+        {
+          type: "answers",
+          data: {
+            statistic: await this.getStatistic(),
+            evaluator: {
+              evaluatorTable: await this.getEvaluatorTable(),
+              evaluatorGraphic: await this.getEvaluatorGraphic()
+            },
+            heuristic: {
+              answersByEvaluator: await this.getAnswersByEvaluator(),
+              answersByHeuristic: await this.getAnswersByHeuristic(),
+              heuristicGraphic: await   this.getHeuristicGraphic()
+            }
+          }
+        }
+      ];
+
       // await this.listItems.forEach(item => {
       //   item.selected.forEach(selected => {
       //     if (selected.value)

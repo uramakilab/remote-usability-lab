@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h1>Heuristics</h1>
+    <h2>Heuristics</h2>
     <v-divider></v-divider>
     <v-row dense v-for="(heuristic, index) in data" :key="index">
       <v-col>
-        <h2 dense class="pa-1">{{ index + 1 }}. {{ heuristic.title }}</h2>
+        <h3 dense class="pa-1">{{ index + 1 }}. {{ heuristic.title }}</h3>
         <v-row
           v-for="(question, i) in heuristic.questions"
           :key="i"
@@ -12,13 +12,13 @@
           dense
         >
           <v-col cols="11">
-            <h3 class="py-1">
+            <h4 class="py-1">
               {{ index + 1 }}.{{ i + 1 }}. {{ question.title }}
-            </h3>
+            </h4>
             <div v-for="(description, j) in question.descriptions" :key="j">
-              <h4 class="py-1">
+              <h5 class="py-1">
                 {{ index + 1 }}.{{ i + 1 }}.{{ j + 1 }}. {{ description.title }}
-              </h4>
+              </h5>
               <TextBox
                 class="mx-4"
                 :text="description.text"
@@ -38,8 +38,9 @@ import TextBox from "@/components/atoms/TextBox";
 export default {
   props: {
     data: {
-      type: Object,
-      require: true
+      type: Array,
+      require: true,
+      defult: []
     }
   },
   components: {

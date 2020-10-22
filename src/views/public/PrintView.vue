@@ -1,18 +1,29 @@
 <template>
   <div>
-    <PrintHeuristicLayout
-      v-if="printObject.type === 'heuristic'"
-      :data="printObject.data"
-    />
+    <div v-for="(item, index) in printObject" :key="index">
+      <PrintHeuristicLayout
+        v-if="item.type === 'heuristic'"
+        :data="item.data"
+      />
+      <PrintOptionsLayout v-if="item.type === 'options'" :data="item.data" />
+      <PrintReportsLayout v-if="item.type === 'reports'" :data="item.data" />
+      <PrintAnswerLayout v-if="item.type === 'answers'" :data="item.data" />
+    </div>
   </div>
 </template>
 
 <script>
 import PrintHeuristicLayout from "@/layouts/PrintHeuristicLayout.vue";
+import PrintOptionsLayout from "@/layouts/PrintOptionsLayout.vue";
+import PrintReportsLayout from "@/layouts/PrintReportsLayout.vue";
+import PrintAnswerLayout from "@/layouts/PrintAnswerLayout.vue";
 
 export default {
   components: {
-    PrintHeuristicLayout
+    PrintHeuristicLayout,
+    PrintOptionsLayout,
+    PrintReportsLayout,
+    PrintAnswerLayout
   },
   computed: {
     printObject() {
@@ -20,7 +31,7 @@ export default {
     }
   },
   beforeMount() {
-    window.print();
+    //window.print();
   }
 };
 </script>
@@ -31,8 +42,9 @@ export default {
     display: none !important;
   }
   @page {
-    size: auto;
-    margin-top: 1px;
+    margin: 10px;
+    padding: 10px;
+    display: flex;
   }
 }
 </style>
