@@ -84,6 +84,12 @@
                 dense
                 @input="$emit('change')"
               ></v-textarea>
+
+              <v-checkbox
+                label="Make template public to all users"
+                v-model="publicTemplate"
+                color="#F9A826"
+              ></v-checkbox>
             </v-col>
           </v-row>
           <v-divider></v-divider>
@@ -127,7 +133,7 @@
               color="green"
               @click="tempDialog = true"
               :disabled="hasTemplate || !object ? true : false"
-              >Create public template</v-btn
+              >Create template</v-btn
             >
           </v-row>
           <v-divider class="my-3 mx-2"></v-divider>
@@ -190,7 +196,7 @@ export default {
     FormTestDescription,
     Snackbar,
     ShowInfo,
-    AccessNotAllowed
+    AccessNotAllowed,
   },
   data: () => ({
     object: null,
@@ -208,6 +214,7 @@ export default {
       (v) => v.length <= 100 || "Max 100 characters",
     ],
     showSettings: false,
+    publicTemplate: true,
   }),
   methods: {
     validate(valid, index) {
@@ -228,33 +235,52 @@ export default {
           data: this.object,
         })
         .then(() => {
-          this.$store.dispatch("updateMyTest", {
-            docId: this.object.admin.id,
-            element: {
+          let element = Object.assign(
+            {},
+            {
               id: this.id,
               title: this.object.title,
               type: this.object.type,
               reports: this.object.reports,
               answers: this.object.answers,
               cooperators: this.object.cooperators,
-              template: this.object.template,
               accessLevel: 0,
-            },
+            }
+          );
+
+          if ("template" in this.object)
+            element = Object.assign(element, {
+              template: this.object.template,
+            });
+
+          console.log("mytest", element);
+          this.$store.dispatch("updateMyTest", {
+            docId: this.object.admin.id,
+            element: element,
           });
 
           this.cooperators.cooperators.forEach((coop) => {
-            this.$store.dispatch("updateMyCoops", {
-              docId: coop.id,
-              element: {
+            element = Object.assign(
+              {},
+              {
                 id: this.id,
                 title: this.object.title,
                 type: this.object.type,
                 reports: this.object.reports,
                 answers: this.object.answers,
                 cooperators: this.object.cooperators,
-                template: this.object.template,
                 accessLevel: coop.accessLevel,
-              },
+              }
+            );
+
+            if ("template" in this.object)
+              element = Object.assign(element, {
+                template: this.object.template,
+              });
+
+            this.$store.dispatch("updateMyCoops", {
+              docId: coop.id,
+              element: element,
             });
           });
 
@@ -371,13 +397,20 @@ export default {
       if (this.$refs.tempform.validate()) {
         let template = {};
         let header = {
-          id: this.$store.getters.user.uid,
-          author: this.$store.getters.user.email,
+          author: Object.assign(
+            {},
+            {
+              email: this.$store.getters.user.email,
+              id: this.$store.getters.user.uid,
+            }
+          ),
           version: "1.0.0",
           date: new Date().toDateString(),
           title: this.templateTitle,
           description: this.templateDescription,
+          isPublic: this.publicTemplate,
         };
+
         if (this.test.type == "Heuristics") {
           template = Object.assign(template, {
             heuristics: this.test.heuristics,
@@ -399,6 +432,12 @@ export default {
         };
 
         this.$store.dispatch("createTemplate", payload).then((id) => {
+          //add id to document
+          this.$store.dispatch("updateTemplate", {
+            docId: id,
+            data: Object.assign(payload.data, { id: id }),
+          });
+
           this.object = Object.assign(this.object, {
             template: Object.assign(
               {},
@@ -408,6 +447,21 @@ export default {
               }
             ),
           });
+
+          let el = {};
+
+          Object.keys(payload.data.header).forEach((key) => {
+            el[key] = payload.data.header[key];
+          });
+
+          el = Object.assign(el, { type: payload.data.body.type, id: id });
+
+          this.$store.dispatch("pushMyTemps", {
+            docId: this.user.uid,
+            element: el,
+            param: "myTemps",
+          });
+
           this.submit();
         });
       }
