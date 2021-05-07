@@ -154,7 +154,7 @@ export default {
   components: {
     ShowInfo,
     Intro,
-    Snackbar
+    Snackbar,
   },
   data: () => ({
     headers: [
@@ -322,6 +322,13 @@ export default {
           param: "reports"
         })
         .then(() => {
+          //remove from answers
+          if (report.log.status == "Submitted")
+            this.$store.dispatch("removeUserAnswer", {
+              docId: this.answers.id,
+              element: Object.assign({}, { id: report.uid }),
+            });
+
           this.$store.commit("setSuccess", "Report successfully deleted");
           this.loadingBtn = false;
           this.dialog = false;
@@ -604,30 +611,32 @@ export default {
           id: 4
         }
       ];
-    }
+    },
   },
   watch: {
     reports() {
       if (Object.keys(this.reports).length) this.loading = false;
     }
-  },
-  created() {
-    if (!this.$store.getters.reports) {
-      this.$store.dispatch("getReports", { id: this.id });
-    } else if (this.$store.getters.reports.id !== this.id)
-      this.$store.dispatch("getReports", { id: this.id });
-    else {
-      this.loading = false;
-    }
+  },    
+  async created() {
+    await this.$store.dispatch("getReports", { id: this.id });
 
-    if (!this.$store.test && this.id !== null && this.id !== undefined) {
+    this.test = Object.assign(
+      {},
+      this.$store.getters.user.myTests.find((test) => test.reports == this.id)
+    );
+
+    await this.$store.dispatch("getAnswers", { id: this.test.answers });
+    if (this.id) {
       this.$store.dispatch("getTest", {
         id: this.$store.getters.user.myTests.find(test => {
           return test.reports == this.id;
         }).id
       });
     }
+
     if (!this.$store.getters.users) this.$store.dispatch("getUsers", {});
+    this.loading = false;
   }
 };
 </script>

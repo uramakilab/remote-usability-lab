@@ -183,6 +183,7 @@
 
           <!-- Templates -> Personal -->
           <List
+            @clicked="setupTempDialog"
             v-if="mainIndex == 2 && subIndex == 0"
             :items="filteredMyTemps"
             type="template"
@@ -190,6 +191,7 @@
 
           <!-- Templates -> Explore -->
           <List
+            @clicked="setupTempDialog"
             v-if="mainIndex == 2 && subIndex == 1"
             :items="showOnExplore"
             type="template"
@@ -201,6 +203,13 @@
           ></List>
         </v-col>
       </v-row>
+
+      <TempDialog
+        :dialog="tempDialog"
+        :showDetails="showTempDetails"
+        :template="temp"
+        @close="tempDialog = false"
+      />
     </div>
   </v-container>
 </template>
@@ -209,11 +218,13 @@
 <script>
 import Snackbar from "@/components/atoms/Snackbar";
 import List from "@/components/atoms/ListComponent";
+import TempDialog from "@/components/molecules/TemplateInfoDialog";
 
 export default {
   components: {
     Snackbar,
     List,
+    TempDialog,
   },
   data: () => ({
     search: "",
@@ -240,6 +251,8 @@ export default {
     exploreTemplates: [],
     disableNext: false,
     disablePrevious: true,
+    tempDialog: false,
+    temp: {},
   }),
   methods: {
     pushCreate() {
@@ -286,6 +299,10 @@ export default {
       this.page--;
       if (this.page <= 1) this.disablePrevious = true;
       this.disableNext = false;
+    },
+    setupTempDialog(temp) {
+      this.temp = Object.assign({}, temp);
+      this.tempDialog = true;
     },
   },
   computed: {
@@ -389,9 +406,18 @@ export default {
     storeTemplates() {
       return this.$store.getters.templates || [];
     },
+    myTempsHeaders() {
+      return this.user.myTemps.map((temp) => {
+        return {
+          header: temp,
+        };
+      });
+    },
     filteredMyTemps() {
-      return this.user.myTemps.filter((temp) => {
-        return temp.title.toLowerCase().includes(this.search.toLowerCase());
+      return this.myTempsHeaders.filter((temp) => {
+        return temp.header.title
+          .toLowerCase()
+          .includes(this.search.toLowerCase());
       });
     },
     loading() {
@@ -401,28 +427,18 @@ export default {
       return this.$store.getters.paginatedTemps;
     },
     showOnExplore() {
-      let array = [];
+      // let array = [];
       let temps = null;
       let start = (this.page - 1) * this.itemsPerPage;
       let finish = this.page * this.itemsPerPage;
 
       temps = this.exploreTemplates.slice(start, finish);
 
-      array = temps.map((temp) => {
-        let obj = {
-          id: temp.id,
-          title: temp.header.title || "No Title",
-          date: temp.header.date,
-          type: temp.body.type,
-          author: temp.header.author,
-          version: temp.header.version,
-          description: temp.header.description,
-        };
-        return obj;
-      });
-
-      return array;
+      return temps;
     },
+    showTempDetails() {
+      return !(this.mainIndex == 2 && this.subIndex == 0); //dont show on this tab
+    }
   },
   watch: {
     mainIndex() {
