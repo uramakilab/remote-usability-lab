@@ -184,7 +184,11 @@ export default {
     async buildPrint() {
       let objectPrint = [
         {
-          type: "heuristic",
+          type: "cover",
+          data: this.test
+        },
+        {
+          type: "heuristics",
           data: this.test.heuristics
         },
         {
@@ -339,6 +343,7 @@ export default {
     },
     goToCoops() {
       this.$emit("goToCoops");
+      // this.reports.reports.push({});
     },
     setTreesHeuristics() {
       this.treeAnswers = [];
