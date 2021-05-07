@@ -1,9 +1,8 @@
 <template>
   <div>
-    <h2 class=" mx-0 px-0 .rounded-t-xl" style="border-style: groove">
-      Options
-    </h2>
-    <v-divider></v-divider>
+    <div class="custom-title">Options</div>
+    <v-divider class="mb-5"></v-divider>
+
     <v-row class="ma-2 px-2" justify="start">
       <v-simple-table dense class=".rounded-sm" style="border-style: groove">
         <template v-slot:default>
@@ -42,4 +41,10 @@ export default {
 </script>
 
 <style>
+.custom-title {
+  font-size: 250%;
+  font-weight: 350;
+  text-align: justify;
+  color: black;
+}
 </style>

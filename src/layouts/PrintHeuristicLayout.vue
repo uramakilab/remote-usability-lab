@@ -1,47 +1,47 @@
 <template>
   <div>
     <div class="custom-title">Heuristics</div>
-
-    <v-divider></v-divider>
+    <v-divider class="mb-10"></v-divider>
 
     <!-- Summary -->
-    <div style="page-break-after: always">
-      <v-row dense v-for="(heuristic, index) in data" :key="index">
-        <v-col>
-          <a class="summary-item" :href="`#H${index}`"
-            >{{ index + 1 }}. {{ heuristic.title }}</a
-          >
-          <v-row
-            v-for="(question, i) in heuristic.questions"
-            :key="i"
-            justify="center"
-            dense
-          >
-            <v-col cols="11">
-              <a :href="`#H${index}-Q${i}`" class="py-1 summary-item">
-                {{ index + 1 }}.{{ i + 1 }}. {{ question.title }}
-              </a>
-              <v-row justify="center" dense>
-                <v-col cols="11">
-                  <div
-                    v-for="(description, j) in question.descriptions"
-                    :key="j"
-                  >
-                    <a
-                      :href="`#H${index}-Q${i}-D${j}`"
-                      class="py-1 summary-item"
+    
+      <div style="columns: 2; width: 100%; page-break-after: always; padding-left: 3%">
+        <v-row dense v-for="(heuristic, index) in data" :key="index">
+          <v-col>
+            <a class="summary-item" :href="`#H${index}`"
+              >{{ index + 1 }}. {{ heuristic.title }}</a
+            >
+            <v-row
+              v-for="(question, i) in heuristic.questions"
+              :key="i"
+              justify="center"
+              dense
+            >
+              <v-col cols="11">
+                <a :href="`#H${index}-Q${i}`" class="py-1 summary-item">
+                  {{ index + 1 }}.{{ i + 1 }}. {{ question.title }}
+                </a>
+                <v-row justify="center" dense>
+                  <v-col cols="11">
+                    <div
+                      v-for="(description, j) in question.descriptions"
+                      :key="j"
                     >
-                      {{ index + 1 }}.{{ i + 1 }}.{{ j + 1 }}.
-                      {{ description.title }}
-                    </a>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </div>
+                      <a
+                        :href="`#H${index}-Q${i}-D${j}`"
+                        class="py-1 summary-item"
+                      >
+                        {{ index + 1 }}.{{ i + 1 }}.{{ j + 1 }}.
+                        {{ description.title }}
+                      </a>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </div>
 
     <!-- Heuris Content -->
     <v-row dense v-for="(heuristic, index) in data" :key="index">
@@ -103,7 +103,7 @@ export default {
   font-size: 250%;
   font-weight: 350;
   text-align: justify;
-  color: black;
+  color: rgb(206, 206, 206);
 }
 .heuris-title {
   font-size: 130%;
@@ -125,7 +125,7 @@ export default {
 }
 .summary-item {
   text-transform: capitalize;
-  color: black!important;
+  color: black !important;
   font-size: 120%;
   text-decoration: none;
 }

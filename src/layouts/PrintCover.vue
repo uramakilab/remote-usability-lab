@@ -4,10 +4,10 @@
     <v-row justify="end" class="created-by"
       >Created by {{ data.admin.email }}</v-row
     >
-
     <div class="mt-5 description">{{ data.description }}</div>
 
-    <div class="custom-title" style="margin-top: 5%">Summary</div>
+    <div class="custom-title mb-5" style="margin-top: 5%">Summary</div>
+
     <div class="pl-1">
       <div v-for="(item, i) in summaryItems" :key="i">
         <a class="summary-item" :href="`#${item}`">{{ i + 1 }}.) {{ item }}</a>
@@ -53,7 +53,7 @@ export default {
   font-size: 150%;
   font-weight: 300;
   text-align: justify;
-  color: #7d7d7d;
+  color: rgb(206, 206, 206);
 }
 .description {
   text-align: justify;

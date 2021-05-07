@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h2 class=" mx-0 px-0 .rounded-t-xl" style="border-style: groove">
-      Answer
-    </h2>
+    <div class="custom-title">Answers</div>
+    <v-divider class="mb-5"></v-divider>
+
     {{ log() }}
     <v-row class="ma-0 pa-0">
       <v-col>
@@ -88,4 +88,10 @@ export default {
 </script>
 
 <style>
+.custom-title {
+  font-size: 250%;
+  font-weight: 350;
+  text-align: justify;
+  color: black;
+}
 </style>
